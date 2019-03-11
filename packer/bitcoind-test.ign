@@ -76,14 +76,20 @@
           "name": "root"
         },
         "mode": 493
-      }
-    ],
-    "disks": [
+      },
       {
-        "device": "/dev/xvdf",
-        "wipeTable": true
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
+        "path": "/data/bitcoin",
+        "user": {
+          "name": "root"
+        },
+        "mode": 493
       }
     ],
+    "disks": [],
     "files": [
       {
         "filesystem": "root",
@@ -110,7 +116,37 @@
           "name": "root"
         },
         "contents": {
-          "source": "data:,nf_conntrack%0A",
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcoin.conf",
+          "verification": {}
+        },
+        "mode": 420
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
+        "path": "/bitcoind/.env",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:text/plain;charset=utf-8;base64,SE9TVD0ke0hPU1ROQU1FfQo=",
+          "verification": {}
+        },
+        "mode": 420
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
+        "path": "/bitcoind/configs/bitcoin/bitcoin.conf.default",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcoin.conf.default",
           "verification": {}
         },
         "mode": 420
@@ -125,7 +161,7 @@
           "name": "root"
         },
         "contents": {
-          "source": "data:,nf_conntrack%0A",
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/haproxy/haproxy.cfg",
           "verification": {}
         },
         "mode": 420
@@ -140,9 +176,22 @@
           "name": "root"
         },
         "contents": {
-          "source": "data:,nf_conntrack%0A",
-          "verification": {}
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/templates/haproxy.jinja2",
+          "verification": {}        },
+        "mode": 420
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
         },
+        "path": "/bitcoind/docker-compose.yaml",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/docker-compose.yaml",
+          "verification": {}        },
         "mode": 420
       },
       {
@@ -185,7 +234,7 @@
           "name": "root"
         },
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,LyoqKg0KICoNCiAqICAgIDAxMDAwMTEwMTEwMDAwMDExMDEwMDAxMTAwMDAxIDAxMDAxMDAwMTExMDEwMDExMDAwMTAgDQogKg0KICogICAgSG9tZXBhZ2U6IGh0dHBzOi8vZ2l0aHViLmNvbS9ibG9ja3N0YWNrL2dhaWENCiAqDQogKi8=",
+          "source": "data:text/plain;charset=utf-8;base64,LyoqKgogKgogKiAgICAwMTAwMDAxMDAxMTAxMTAwMDExMDExMTEwMTEwMDAxMTAxMTAxMDExMDExMTAwMTEwMTExMDEwMDAxMTAwMDAxMDExMDAwMTEwMTEwMTAxMTAxMDEwMDAwMDEwMDAwMTAwMTAwMDAxMSAwMTAwMDAxMDAxMTAxMDAxMDExMTAxMDAwMTEwMDAxMTAxMTAxMTExMDExMDEwMDEwMTEwMTExMDAxMTAwMTAwCiAqCiAqICAgIEhvbWVwYWdlOiBodHRwczovL2dpdGh1Yi5jb20vYmxvY2tzdGFja3BiYy9iaXRjb2luLWRvY2tlcgogKgogKi8=",
           "verification": {}
         },
         "mode": 420
@@ -221,17 +270,7 @@
         "mode": 420
       }
     ],
-    "filesystems": [
-      {
-        "mount": {
-          "device": "/dev/xvdf",
-          "format": "xfs",
-          "label": "DATA",
-          "wipeFilesystem": true
-        },
-        "name": "data"
-      }
-    ]
+    "filesystems": []
   },
   "systemd": {
     "units": [
@@ -250,28 +289,23 @@
         "name": "docker-tcp.socket"
       },
       {
-        "contents": "[Unit]\nDescription=Mount Local Disk to /data\n\n[Mount]\nWhat=/dev/xvdf\nWhere=/data\nType=xfs\n[Install]\nWantedBy=local-fs.target\n\n",
-        "enabled": true,
-        "name": "btc-docker-data.mount"
-      },
-      {
         "contents": "[Unit]\nDescription=Install docker-compose\nConditionPathExists=!/opt/bin/docker-compose\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironment=\"VERSION=`/usr/bin/curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | cut -f4 -d '\\\"'`\"\nExecStart=/bin/bash -c \"/usr/bin/curl -o /opt/bin/docker-compose -sL https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-Linux-x86_64\"\nExecStart=/usr/bin/chmod +x /opt/bin/docker-compose\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "install-docker-compose.service"
       },
       {
-        "contents": "[Unit]\nDescription=Run BTC HAProxy Service\nRequires=docker.service\nAfter=docker.service\nAfter=btc-docker-data.mount\nAfter=install-docker-compose.service\n\n[Service]\nWorkingDirectory=/bitcoind\nRestart=always\n\n# Set Environment Variables\nEnvironmentFile=/etc/environment\n\n# Stop\n# Compose down, remove containers and volumes\nExecStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml down -v\n\nExecStopStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml rm -v\n\n# Start\n# Compose up\nExecStart=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml up -d\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "[Unit]\nDescription=Run BTC service behind HAProxy\nRequires=docker.service\nAfter=docker.service\nAfter=install-docker-compose.service\n\n[Service]\nWorkingDirectory=/bitcoind\nRestart=always\n\n# Set Environment Variables\nEnvironmentFile=/etc/environment\n\n# Stop\n# Compose down, remove containers and volumes\nExecStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml down -v\n\nExecStopStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml rm -v\n\n# Start\n# Compose up\nExecStart=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml up -d\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "btc.service"
       },
       {
-        "contents": "[Unit]\nDescription=Check IPs for haproxy Service\nConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg\nRequires=btc.service\nAfter=btc.service\n[Service]\nType=oneshot\nRemainAfterExit=no\nEnvironmentFile=/etc/environment\nExecStart=docker run -d -e PROJECT='ops-shared' -e ROLE='bitcoind' -v '/var/run/docker.sock:/var/run/docker.sock' -v '/bitcoind/configs/haproxy:/bitcoind/configs/haproxy' -v '/bitcoind/templates:/bitcoind/templates' --name bitcoind_python quay.io/blockstack bitcoind:python.gcp\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "[Unit]\nDescription=Check IPs for haproxy Service\nConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg\nConditionPathExists=/bitcoind/templates/haproxy.jinja2\nRequires=btc.service\nAfter=btc.service\n\n[Service]\nEnvironmentFile=/etc/environment\nExecStart=docker run -d -e PROJECT='ops-shared' -e ROLE='bitcoind' -v '/var/run/docker.sock:/var/run/docker.sock' -v '/bitcoind/configs/haproxy:/bitcoind/configs/haproxy' -v '/bitcoind/templates:/bitcoind/templates' --name bitcoind_python quay.io/blockstack/bitcoind:python.gcp\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": false,
         "name": "check_ips.service"
       },
       {
         "contents": "[Unit]\n\nDescription=Check IPs for haproxy Timer\n\n[Timer]\nOnBootSec=30\nOnCalendar=*-*-* *:00:00\n\n[Install]\nWantedBy=timers.target",
-        "enabled": true,
+        "enabled": false,
         "name": "check_ips.timer"
       }
     ]

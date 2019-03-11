@@ -43,10 +43,6 @@ frontend bitcoind_rpc
   # Rules
   tcp-request connection track-sc0 src table Abuse
   tcp-request connection reject if abuse_cnt
-  tcp-request deny if abuse_cnt
-  tcp-request deny if is_abuse inc_abuse_cnt
-  http-request deny if abuse_cnt
-  http-request deny if is_abuse inc_abuse_cnt
 
   default_backend bitcoind_rpc
 
@@ -65,10 +61,6 @@ frontend bitcoind_p2p
   # Rules
   tcp-request connection track-sc0 src table Abuse
   tcp-request connection reject if abuse_cnt
-  tcp-request session if abuse_cnt
-  tcp-request session if is_abuse inc_abuse_cnt
-  http-request deny if abuse_cnt
-  http-request deny if is_abuse inc_abuse_cnt
 
   default_backend bitcoind_p2p
 

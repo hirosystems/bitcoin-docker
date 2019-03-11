@@ -86,13 +86,11 @@ if __name__ == '__main__':
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         '--project_id',
-        # default='ops-shared',
         default=os.environ['PROJECT'],
         help='Your Google Cloud project ID.'
     )
     parser.add_argument(
         '--role',
-        # default='bitcoind',
         default=os.environ['ROLE'],
         help='Your Google Cloud project ID.'
     )

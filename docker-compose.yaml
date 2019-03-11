@@ -38,7 +38,7 @@ services:
       - 8333
       - 1024
     environment:
-      - HOST
+      - HOST=${HOSTNAME}
     command: /usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L $HOST
     networks:
       - bitcoin
