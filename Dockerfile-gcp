@@ -1,0 +1,33 @@
+FROM python:3-alpine
+
+ENV ROLE=""
+ENV PROJECT=""
+
+ARG DOCKER_CLI_VERSION="18.09.3"
+ARG DOCKER_URL="https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_CLI_VERSION.tgz"
+ARG GLIBC_VERSION="2.29-r0"
+ARG GLIBC_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk"
+ARG GLIBC_BIN_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk"
+ARG GLIBC_I18N_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-i18n-${GLIBC_VERSION}.apk"
+
+WORKDIR /bitcoind
+COPY ./scripts/update_haproxy_gcp.py .
+COPY ./templates ./templates
+
+RUN apk --no-cache add --update ca-certificates curl \
+    && curl -L -s -o /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    && curl -L -s -o /tmp/glibc-${GLIBC_VERSION}.apk $GLIBC_URL \
+    && curl -L -s -o /tmp/glibc-bin-${GLIBC_VERSION}.apk ${GLIBC_BIN_URL} \
+    && curl -L -s -o /tmp/glibc-i18n-${GLIBC_VERSION}.apk ${GLIBC_I18N_URL} \
+    && apk --no-cache add /tmp/glibc-${GLIBC_VERSION}.apk /tmp/glibc-bin-${GLIBC_VERSION}.apk /tmp/glibc-i18n-${GLIBC_VERSION}.apk \
+    && /usr/glibc-compat/sbin/ldconfig /usr/lib /lib \
+    && mkdir -p /tmp/download \
+    && curl -L -s ${DOCKER_URL} | tar -xz -C /tmp/download \
+    && mv /tmp/download/docker/docker /usr/local/bin/ \
+    && pip install --upgrade jinja2 google-api-python-client docker \
+    && rm -rf /tmp/download /tmp/glibc-${GLIBC_VERSION}.apk /tmp/glibc-bin-${GLIBC_VERSION}.apk /tmp/glibc-i18n-${GLIBC_VERSION}.apk \
+    && apk del curl ca-certificates \
+    && rm -rf /var/cache/apk/*
+
+#ENTRYPOINT ["/usr/local/bin/python", "/bitcoind/update_haproxy_gcp.py"]
+CMD ["/usr/local/bin/python", "/bitcoind/update_haproxy_gcp.py"]
