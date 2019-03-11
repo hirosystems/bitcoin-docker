@@ -1,0 +1,2 @@
+# bitcoin-docker
+Dockerize bitcoind
