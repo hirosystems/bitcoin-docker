@@ -137,6 +137,21 @@
         "group": {
           "name": "root"
         },
+        "path": "/bitcoind/scripts/create_docker_network.sh",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/scripts/create_docker_network.sh",
+          "verification": {}
+        },
+        "mode": 493
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
         "path": "/bitcoind/scripts/update_haproxy_gcp.py",
         "user": {
           "name": "root"
@@ -145,7 +160,7 @@
           "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/scripts/update_haproxy_gcp.py",
           "verification": {}
         },
-        "mode": 420
+        "mode": 493
       },
       {
         "filesystem": "root",
@@ -281,7 +296,7 @@
         "name": "haproxy.service"
       },
       {
-        "contents": "# create_docker_network.service\n[Unit]\nDescription=BTC Docker Network\nAfter=docker.service\nRequires=docker.service\nBefore=btc.service\nBefore=haproxy.service\n\n[Service]\nTimeoutStartSec=0\nType=oneshot\nRemainAfterExit=yes\n\nExecStart=/usr/bin/docker network create -d bridge bitcoind\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "# create_docker_network.service\n[Unit]\nDescription=BTC Docker Network\nAfter=docker.service\nRequires=docker.service\nBefore=btc.service\nBefore=haproxy.service\nConditionFileIsExecutable=/bitcoind/scripts/create_docker_network.sh\n\n[Service]\nTimeoutStartSec=0\nType=oneshot\nRemainAfterExit=yes\n\nExecStart=/bin/sh /bitcoind/scripts/create_docker_network.sh\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "create_docker_network.service"
       },
