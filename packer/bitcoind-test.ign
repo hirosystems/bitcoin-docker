@@ -38,6 +38,17 @@
         "group": {
           "name": "root"
         },
+        "path": "/bitcoind/scripts",
+        "user": {
+          "name": "root"
+        },
+        "mode": 493
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
         "path": "/bitcoind/configs/haproxy",
         "user": {
           "name": "root"
@@ -126,12 +137,12 @@
         "group": {
           "name": "root"
         },
-        "path": "/bitcoind/.env",
+        "path": "/bitcoind/scripts/update_haproxy_gcp.py",
         "user": {
           "name": "root"
         },
         "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,SE9TVD0ke0hPU1ROQU1FfQo=",
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/scripts/update_haproxy_gcp.py",
           "verification": {}
         },
         "mode": 420
@@ -185,20 +196,6 @@
         "group": {
           "name": "root"
         },
-        "path": "/bitcoind/docker-compose.yaml",
-        "user": {
-          "name": "root"
-        },
-        "contents": {
-          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/docker-compose.yaml",
-          "verification": {}        },
-        "mode": 420
-      },
-      {
-        "filesystem": "root",
-        "group": {
-          "name": "root"
-        },
         "path": "/etc/docker/docker.json",
         "user": {
           "name": "root"
@@ -220,21 +217,6 @@
         },
         "contents": {
           "source": "data:text/plain;charset=utf-8;base64,c2V0IGZmPXVuaXg=",
-          "verification": {}
-        },
-        "mode": 420
-      },
-      {
-        "filesystem": "root",
-        "group": {
-          "name": "root"
-        },
-        "path": "/etc/motd.d/default.conf",
-        "user": {
-          "name": "root"
-        },
-        "contents": {
-          "source": "data:text/plain;charset=utf-8;base64,LyoqKgogKgogKiAgICAwMTAwMDAxMDAxMTAxMTAwMDExMDExMTEwMTEwMDAxMTAxMTAxMDExMDExMTAwMTEwMTExMDEwMDAxMTAwMDAxMDExMDAwMTEwMTEwMTAxMTAxMDEwMDAwMDEwMDAwMTAwMTAwMDAxMSAwMTAwMDAxMDAxMTAxMDAxMDExMTAxMDAwMTEwMDAxMTAxMTAxMTExMDExMDEwMDEwMTEwMTExMDAxMTAwMTAwCiAqCiAqICAgIEhvbWVwYWdlOiBodHRwczovL2dpdGh1Yi5jb20vYmxvY2tzdGFja3BiYy9iaXRjb2luLWRvY2tlcgogKgogKi8=",
           "verification": {}
         },
         "mode": 420
@@ -285,18 +267,23 @@
       },
       {
         "contents": "[Unit]\nDescription=Docker Socket for the API\n\n[Socket]\nListenStream=2375\nService=docker.service\nBindIPv6Only=both\n\n[Install]\nWantedBy=sockets.target\n",
-        "enabled": true,
+        "enabled": false,
         "name": "docker-tcp.socket"
       },
       {
-        "contents": "[Unit]\nDescription=Install docker-compose\nConditionPathExists=!/opt/bin/docker-compose\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironment=\"VERSION=`/usr/bin/curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | cut -f4 -d '\\\"'`\"\nExecStart=/bin/bash -c \"/usr/bin/curl -o /opt/bin/docker-compose -sL https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-Linux-x86_64\"\nExecStart=/usr/bin/chmod +x /opt/bin/docker-compose\n\n[Install]\nWantedBy=multi-user.target",
-        "enabled": true,
-        "name": "install-docker-compose.service"
-      },
-      {
-        "contents": "[Unit]\nDescription=Run BTC service behind HAProxy\nRequires=docker.service\nAfter=docker.service\nAfter=install-docker-compose.service\n\n[Service]\nWorkingDirectory=/bitcoind\nRestart=always\n\n# Set Environment Variables\nEnvironmentFile=/etc/environment\n\n# Stop\n# Compose down, remove containers and volumes\nExecStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml down -v\n\nExecStopStop=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml rm -v\n\n# Start\n# Compose up\nExecStart=/opt/bin/docker-compose -f /bitcoind/docker-compose.yaml up -d\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "# btc\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:latest\n ExecStart=/usr/bin/docker run -d\\\n  --net=bitcoind\\\n  -p 38332:8332\\\n  -p 38333:8333\\\n  -p 58333:28332\\\n  --expose 38332\\\n  --expose 38333\\\n  --expose 58333\\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf\\\n  -e BTC_DATA=/root/.bitcoin\\\n  -e BTC_PID=/run/bitcoind/bitcoind.pid\\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf\\\n  -v /data/bitcoin:/root/.bitcoin\\\n  --name bitcoin_core\\\n  quay.io/blockstack/bitcoind:latest\\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "btc.service"
+      },
+      {
+        "contents": "# haproxy\n[Unit]\nDescription=HAproxy service for btc\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\n\nExecStartPre=-/usr/bin/docker stop bitcoin_haproxy\nExecStartPre=-/usr/bin/docker rm bitcoin_haproxy\nExecStartPre=/usr/bin/docker pull haproxy:alpine\nExecStart=/usr/bin/docker run -d\\\n  --net=bitcoind\\\n  -p 8332:8332\\\n  -p 8333:8333\\\n  -p 1024:1024\\\n  --expose=8332\\\n  --expose=8333\\\n  --expose=1024\\\n  -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg\\\n  --name bitcoin_haproxy\\\n  haproxy:alpine\\\n/usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L ${HOSTNAME}\n\n[Install]\nWantedBy=multi-user.target",
+        "enabled": true,
+        "name": "haproxy.service"
+      },
+      {
+        "contents": "# create_docker_network.service\n[Unit]\nDescription=BTC Docker Network\nAfter=docker.service\nRequires=docker.service\nBefore=btc.service\nBefore=haproxy.service\n\n[Service]\nTimeoutStartSec=0\nType=oneshot\nRemainAfterExit=yes\n\nExecStart=/usr/bin/docker network create -d bridge bitcoind\n\n[Install]\nWantedBy=multi-user.target",
+        "enabled": true,
+        "name": "create_docker_network.service"
       },
       {
         "contents": "[Unit]\nDescription=Check IPs for haproxy Service\nConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg\nConditionPathExists=/bitcoind/templates/haproxy.jinja2\nRequires=btc.service\nAfter=btc.service\n\n[Service]\nEnvironmentFile=/etc/environment\nExecStart=docker run -d -e PROJECT='ops-shared' -e ROLE='bitcoind' -v '/var/run/docker.sock:/var/run/docker.sock' -v '/bitcoind/configs/haproxy:/bitcoind/configs/haproxy' -v '/bitcoind/templates:/bitcoind/templates' --name bitcoind_python quay.io/blockstack/bitcoind:python.gcp\n\n[Install]\nWantedBy=multi-user.target",

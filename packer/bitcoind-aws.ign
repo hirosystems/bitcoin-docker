@@ -38,17 +38,6 @@
         "group": {
           "name": "root"
         },
-        "path": "/bitcoind/scripts",
-        "user": {
-          "name": "root"
-        },
-        "mode": 493
-      },
-      {
-        "filesystem": "root",
-        "group": {
-          "name": "root"
-        },
         "path": "/bitcoind/configs/haproxy",
         "user": {
           "name": "root"
@@ -100,7 +89,12 @@
         "mode": 493
       }
     ],
-    "disks": [],
+    "disks": [
+      {
+        "device": "/dev/xvdf",
+        "wipeTable": true
+      }
+    ],
     "files": [
       {
         "filesystem": "root",
@@ -128,21 +122,6 @@
         },
         "contents": {
           "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcoin.conf",
-          "verification": {}
-        },
-        "mode": 420
-      },
-      {
-        "filesystem": "root",
-        "group": {
-          "name": "root"
-        },
-        "path": "/bitcoind/scripts/update_haproxy_gcp.py",
-        "user": {
-          "name": "root"
-        },
-        "contents": {
-          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/scripts/update_haproxy_gcp.py",
           "verification": {}
         },
         "mode": 420
@@ -252,7 +231,17 @@
         "mode": 420
       }
     ],
-    "filesystems": []
+    "filesystems": [
+      {
+        "mount": {
+          "device": "/dev/xvdf",
+          "format": "xfs",
+          "label": "DATA",
+          "wipeFilesystem": true
+        },
+        "name": "data"
+      }
+    ]
   },
   "systemd": {
     "units": [
@@ -269,6 +258,11 @@
         "contents": "[Unit]\nDescription=Docker Socket for the API\n\n[Socket]\nListenStream=2375\nService=docker.service\nBindIPv6Only=both\n\n[Install]\nWantedBy=sockets.target\n",
         "enabled": false,
         "name": "docker-tcp.socket"
+      },
+      {
+        "contents": "[Unit]\nDescription=Mount Local Disk to /data\n\n[Mount]\nWhat=/dev/xvdf\nWhere=/data\nType=xfs\n[Install]\nWantedBy=local-fs.target\n\n",
+        "enabled": true,
+        "name": "btc-docker-data.mount"
       },
       {
         "contents": "# btc\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:latest\n ExecStart=/usr/bin/docker run -d\\\n  --net=bitcoind\\\n  -p 38332:8332\\\n  -p 38333:8333\\\n  -p 58333:28332\\\n  --expose 38332\\\n  --expose 38333\\\n  --expose 58333\\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf\\\n  -e BTC_DATA=/root/.bitcoin\\\n  -e BTC_PID=/run/bitcoind/bitcoind.pid\\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf\\\n  -v /data/bitcoin:/root/.bitcoin\\\n  --name bitcoin_core\\\n  quay.io/blockstack/bitcoind:latest\\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
