@@ -14,7 +14,7 @@ template_source = "haproxy.jinja2"
 template_dest = "haproxy.cfg.new"
 haproxy_cfg = "haproxy.cfg"
 # client = docker.from_env()
-# container_name = "bitcoind_haproxy_1"
+# container_name = "bitcoin_haproxy"
 # client = docker.APIClient(base_url='unix://var/run/docker.sock')
 
 
@@ -76,8 +76,9 @@ def main(project, role):
         if instances:
             print('Retrieving ips in project %s ( %s )' % (project, zone))
             for instance in instances:
-                # ips[instance['labels']['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                ips[instance['labels']['name']] = instance['networkInterfaces'][0]['networkIP']
+                # forced to use public ip's here...
+                ips[instance['labels']['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                # ips[instance['labels']['name']] = instance['networkInterfaces'][0]['networkIP']
 
 
 if __name__ == '__main__':
@@ -98,6 +99,7 @@ if __name__ == '__main__':
     print(" - project: %s" % (args.project_id))
     print(" - role: %s" % (args.role))
     local_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
+    # uncomment to test locally
     # local_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
     template_path = local_path + "/templates"
     config = local_path + "/configs/haproxy/" + haproxy_cfg
