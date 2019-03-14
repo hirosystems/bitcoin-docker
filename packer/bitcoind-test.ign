@@ -122,21 +122,6 @@
         "group": {
           "name": "root"
         },
-        "path": "/bitcoind/configs/bitcoin/bitcoin.conf",
-        "user": {
-          "name": "root"
-        },
-        "contents": {
-          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcoin.conf",
-          "verification": {}
-        },
-        "mode": 420
-      },
-      {
-        "filesystem": "root",
-        "group": {
-          "name": "root"
-        },
         "path": "/bitcoind/scripts/create_docker_network.sh",
         "user": {
           "name": "root"
@@ -161,6 +146,21 @@
           "verification": {}
         },
         "mode": 493
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
+        "path": "/bitcoind/configs/bitcoin/bitcoin.conf",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcoin.conf",
+          "verification": {}
+        },
+        "mode": 420
       },
       {
         "filesystem": "root",
@@ -286,12 +286,17 @@
         "name": "docker-tcp.socket"
       },
       {
-        "contents": "# btc\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:latest\n ExecStart=/usr/bin/docker run -d\\\n  --net=bitcoind\\\n  -p 38332:8332\\\n  -p 38333:8333\\\n  -p 58333:28332\\\n  --expose 38332\\\n  --expose 38333\\\n  --expose 58333\\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf\\\n  -e BTC_DATA=/root/.bitcoin\\\n  -e BTC_PID=/run/bitcoind/bitcoind.pid\\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf\\\n  -v /data/bitcoin:/root/.bitcoin\\\n  --name bitcoin_core\\\n  quay.io/blockstack/bitcoind:latest\\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "[Unit]\nDescription=Mount Local Disk to /data\n\n[Mount]\nWhat=/dev/sdb1\nWhere=/data\n[Install]\nWantedBy=local-fs.target\n\n",
+        "enabled": false,
+        "name": "data.mount"
+      },
+      {
+        "contents": "# btc.service\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:alpine\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  --memory=2560m \\\n  -p 38332:8332 \\\n  -p 38333:8333 \\\n  -p 58333:28332 \\\n  --expose 38332 \\\n  --expose 38333 \\\n  --expose 58333 \\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf \\\n  -e BTC_DATA=/root/.bitcoin \\\n  -e BTC_PID=/run/bitcoind.pid \\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \\\n  -v /data/bitcoin:/root/.bitcoin \\\n  --name bitcoin_core \\\n  quay.io/blockstack/bitcoind:alpine \\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "btc.service"
       },
       {
-        "contents": "# haproxy\n[Unit]\nDescription=HAproxy service for btc\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\n\nExecStartPre=-/usr/bin/docker stop bitcoin_haproxy\nExecStartPre=-/usr/bin/docker rm bitcoin_haproxy\nExecStartPre=/usr/bin/docker pull haproxy:alpine\nExecStart=/usr/bin/docker run -d\\\n  --net=bitcoind\\\n  -p 8332:8332\\\n  -p 8333:8333\\\n  -p 1024:1024\\\n  --expose=8332\\\n  --expose=8333\\\n  --expose=1024\\\n  -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg\\\n  --name bitcoin_haproxy\\\n  haproxy:alpine\\\n/usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L ${HOSTNAME}\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "# haproxy.service\n[Unit]\nDescription=HAproxy service for btc\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\n\nExecStartPre=-/usr/bin/docker stop bitcoin_haproxy\nExecStartPre=-/usr/bin/docker rm bitcoin_haproxy\nExecStartPre=/usr/bin/docker pull haproxy:alpine\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  -m 128m \\\n  -p 8332:8332 \\\n  -p 8333:8333 \\\n  -p 1024:1024 \\\n  --expose=8332 \\\n  --expose=8333 \\\n  --expose=1024 \\\n  -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \\\n  --name bitcoin_haproxy \\\n  haproxy:alpine \\\n/usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L %H\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": true,
         "name": "haproxy.service"
       },
@@ -301,13 +306,13 @@
         "name": "create_docker_network.service"
       },
       {
-        "contents": "[Unit]\nDescription=Check IPs for haproxy Service\nConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg\nConditionPathExists=/bitcoind/templates/haproxy.jinja2\nRequires=btc.service\nAfter=btc.service\n\n[Service]\nEnvironmentFile=/etc/environment\nExecStart=docker run -d -e PROJECT='ops-shared' -e ROLE='bitcoind' -v '/var/run/docker.sock:/var/run/docker.sock' -v '/bitcoind/configs/haproxy:/bitcoind/configs/haproxy' -v '/bitcoind/templates:/bitcoind/templates' --name bitcoind_python quay.io/blockstack/bitcoind:python.gcp\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "# check_ips.service\n[Unit]\nDescription=Check IPs for haproxy Service\nConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg\nConditionPathExists=/bitcoind/templates/haproxy.jinja2\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nEnvironmentFile=/etc/environment\nExecStart=/usr/bin/docker container prune -f --filter \"until=4h\"\nExecStart=/usr/bin/docker run -d \\\n  -e PROJECT=ops-shared \\\n  -e ROLE=bitcoind \\\n  -v /var/run/docker.sock:/var/run/docker.sock \\\n  -v /bitcoind/configs/haproxy:/bitcoind/configs/haproxy \\\n  -v /bitcoind/templates:/bitcoind/templates \\\nquay.io/blockstack/bitcoind:python.gcp\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": false,
         "name": "check_ips.service"
       },
       {
-        "contents": "[Unit]\n\nDescription=Check IPs for haproxy Timer\n\n[Timer]\nOnBootSec=30\nOnCalendar=*-*-* *:00:00\n\n[Install]\nWantedBy=timers.target",
-        "enabled": false,
+        "contents": "# check_ips.timer\n[Unit]\n\nDescription=Check IPs for haproxy Timer\n\n[Timer]\nOnUnitActiveSec=60\nOnCalendar=*:0/10\n\n[Install]\nWantedBy=timers.target",
+        "enabled": true,
         "name": "check_ips.timer"
       }
     ]

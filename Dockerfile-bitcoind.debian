@@ -1,0 +1,29 @@
+FROM debian:latest
+
+ENV BTC_CONF="/etc/bitcoin/bitcoin.conf"
+ENV BTC_DATA="/root/.bitcoin"
+ENV BTC_PID="/run/bitcoind.pid"
+
+ARG BTC_VERSION="0.18.99.0"
+ARG BTC_URL="https://github.com/blockstackpbc/bitcoin/releases/download/${BTC_VERSION}/bitcoin-${BTC_VERSION}.tar.gz"
+
+WORKDIR /
+COPY ./configs/bitcoin/bitcoin.conf.default ${BTC_CONF}
+
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    libboost-system-dev \
+    libboost-filesystem-dev \
+    libboost-thread-dev \
+    libboost-chrono-dev \
+    libevent-dev \
+    libzmq5 \
+    && curl -L -o /bitcoin-${BTC_VERSION}.tar.gz ${BTC_URL} \
+    && tar -xzvf /bitcoin-${BTC_VERSION}.tar.gz \
+    && mkdir /root/.bitcoin \
+    && mv /bitcoin-*/bin/* /usr/local/bin/ \
+    && rm -rf /bitcoin-*
+
+EXPOSE 8332 8333 18332 18333
+ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/bitcoind -conf=${BTC_CONF} -pid=${BTC_PID} -datadir=${BTC_DATA}"]

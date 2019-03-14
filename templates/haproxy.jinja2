@@ -62,7 +62,7 @@ backend bitcoind_rpc
   balance leastconn
   server bitcoin_core bitcoin_core.bitcoind:8332 maxconn 100 check port 8332 check inter 10s resolvers docker_resolver resolve-prefer ipv4
   {% for key, value in hosts.items() -%}
-  server {{ key|e }} {{ value|e }}:38332 maxconn 100 check port 38332
+  server {{ key|e }} {{ value|e }}:38332 maxconn 100 check port 38332 check inter 10s
   {% endfor %}
 
 backend bitcoind_p2p
@@ -71,7 +71,7 @@ backend bitcoind_p2p
   balance leastconn
   server bitcoin_core bitcoin_core.bitcoind:8333 maxconn 100 check port 8333 check inter 10s resolvers docker_resolver resolve-prefer ipv4
   {% for key, value in hosts.items() -%}
-  server {{ key|e }} {{ value|e }}:38333 maxconn 100 check port 38333
+  server {{ key|e }} {{ value|e }}:38333 maxconn 100 check port 38333 check inter 10s
   {% endfor %}
 
 backend Abuse

@@ -1,10 +1,12 @@
+#!/usr/bin/env python
 import googleapiclient.discovery
 import argparse
 import collections
 import jinja2
 import os
+import os.path
 import hashlib
-# import docker
+import docker
 from shutil import copyfile, copymode
 
 
@@ -13,9 +15,8 @@ ips = {}
 template_source = "haproxy.jinja2"
 template_dest = "haproxy.cfg.new"
 haproxy_cfg = "haproxy.cfg"
-# client = docker.from_env()
-# container_name = "bitcoin_haproxy"
-# client = docker.APIClient(base_url='unix://var/run/docker.sock')
+client = docker.from_env()
+container_name = "bitcoin_haproxy"
 
 
 def get_sha512(file):
@@ -26,16 +27,20 @@ def get_sha512(file):
     return False
 
 
-# def restart_haproxy(container_name):
-#     pre_container = client.containers(filters={'name': container_name})
-#     if len(pre_container) > 0 and pre_container[0]['State'] is 'running':
-#         client.restart(container_name)
-#     else:
-#         client.start(container_name)
-#     post_container = client.containers(filters={'name': container_name})
-#     if len(post_container) == 0 or post_container[0]['State'] is not 'running':
-#         return False
-#     return True
+def restart_haproxy(container_name):
+    client = docker.APIClient(base_url='unix://var/run/docker.sock')
+    pre_container = client.containers(filters={'name': container_name})
+    pre_container = client.containers(filters={'name': container_name})
+    if len(pre_container) > 0 and pre_container[0]['State'] == 'running':
+        print("Restarting Container: %s" % (container_name))
+        client.restart(container_name)
+    else:
+        print("Starting Container: %s" % (container_name))
+        client.start(container_name)
+    post_container = client.containers(filters={'name': container_name})
+    if len(post_container) == 0 or post_container[0]['State'] != 'running':
+        return False
+    return True
 
 
 def list_instances(compute, project, zone, role):
@@ -77,8 +82,10 @@ def main(project, role):
             print('Retrieving ips in project %s ( %s )' % (project, zone))
             for instance in instances:
                 # forced to use public ip's here...
-                ips[instance['labels']['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                # ips[instance['labels']['name']] = instance['networkInterfaces'][0]['networkIP']
+                if 'natIP' in instance['networkInterfaces'][0]['accessConfigs'][0]:
+                    ips[instance['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                # if 'networkIP' in instance['networkInterfaces'][0]:
+                #     ips[instance['name']] = instance['networkInterfaces'][0]['networkIP']
 
 
 if __name__ == '__main__':
@@ -109,30 +116,40 @@ if __name__ == '__main__':
     print("template_path: %s" % (template_path))
     print("saved_config: %s" % (saved_config))
     print("new_config: %s" % (new_config))
-
+    print("current_config: %s" % (config))
+    if not os.path.isfile(config):
+        print("%s is missing" % (config))
+        exit(1)
     main(args.project_id, args.role)
     if len(ips) > 0:
         hosts = collections.OrderedDict(sorted(ips.items()))
         print(hosts)
         write_template(template_path, template_source, new_config, hosts)
-    new_hash = get_sha512(local_path + "/configs/haproxy/" + template_dest)
-    if new_hash is not False:
-        print("new_hash: %s" % (new_hash))
-    old_hash = get_sha512(local_path + "/configs/haproxy/" + haproxy_cfg)
-    if old_hash is not False:
-        print("old_hash: %s" % (old_hash))
-    if new_hash != old_hash:
-        copyfile(config, saved_config)
-        copymode(config, saved_config)
-        copyfile(new_config, config)
-        copymode(new_config, config)
-        print("haproxy configs do not match")
-        print("\t - old config: %s" % (old_hash))
-        print("\t - new config: %s" % (new_hash))
-        # print("Restarting haproxy container")
-        # if not restart_haproxy(container_name):
-        #     copyfile(saved_config, config)
-        #     copymode(saved_config, config)
-        #     if not restart_haproxy(container_name):
-        #         exit(2)
+        if not os.path.isfile(new_config):
+            print("File %s is missing" % (new_config))
+            exit(1)
+        new_hash = get_sha512(new_config)
+        old_hash = get_sha512(config)
+        if new_hash is not False:
+            print("new_hash: %s" % (new_hash))
+        if old_hash is not False:
+            print("old_hash: %s" % (old_hash))
+        if (new_hash and old_hash) and (new_hash != old_hash):
+            print("haproxy configs do not match")
+            print("\t - old config: %s" % (old_hash))
+            print("\t - new config: %s" % (new_hash))
+            print("\t - copying haproxy.cfg -> %s" % (saved_config))
+            copyfile(config, saved_config)
+            copymode(config, saved_config)
+            if os.path.isfile(saved_config):
+                print("\t - copying haproxy.cfg.new -> %s" % (config))
+                copyfile(new_config, config)
+                copymode(new_config, config)
+                if not restart_haproxy(container_name):
+                    print("Container %s restart failed" % (container_name))
+                    print("\t - replacing config with %s" % (saved_config))
+                    copyfile(saved_config, config)
+                    copymode(saved_config, config)
+                    if not restart_haproxy(container_name):
+                        exit(2)
     exit(0)
