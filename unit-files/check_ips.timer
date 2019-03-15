@@ -1,0 +1,11 @@
+# check_ips.timer
+[Unit]
+
+Description=Check IPs for haproxy Timer
+
+[Timer]
+OnUnitActiveSec=60
+OnCalendar=*:0/10
+
+[Install]
+WantedBy=timers.target

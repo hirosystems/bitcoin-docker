@@ -1,0 +1,18 @@
+# create_docker_network.service
+[Unit]
+Description=BTC Docker Network
+After=docker.service
+Requires=docker.service
+Before=btc.service
+Before=haproxy.service
+ConditionFileIsExecutable=/bitcoind/scripts/create_docker_network.sh
+
+[Service]
+TimeoutStartSec=0
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=/bin/sh /bitcoind/scripts/create_docker_network.sh
+
+[Install]
+WantedBy=multi-user.target

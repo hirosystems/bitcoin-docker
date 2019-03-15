@@ -1,0 +1,31 @@
+# haproxy.service
+[Unit]
+Description=HAproxy service for btc
+After=docker.service
+Requires=docker.service
+After=create_docker_network.service
+Requires=create_docker_network.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker stop bitcoin_haproxy
+ExecStartPre=-/usr/bin/docker rm bitcoin_haproxy
+ExecStartPre=/usr/bin/docker pull haproxy:alpine
+ExecStart=/usr/bin/docker run -d \
+  --net=bitcoind \
+  -m 128m \
+  -p 8332:8332 \
+  -p 8333:8333 \
+  -p 1024:1024 \
+  --expose=8332 \
+  --expose=8333 \
+  --expose=1024 \
+  -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \
+  --name bitcoin_haproxy \
+  haproxy:alpine \
+/usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L %H
+
+[Install]
+WantedBy=multi-user.target

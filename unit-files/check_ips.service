@@ -1,0 +1,21 @@
+# check_ips.service
+[Unit]
+Description=Check IPs for haproxy Service
+ConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg
+ConditionPathExists=/bitcoind/templates/haproxy.jinja2
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/environment
+ExecStart=/usr/bin/docker container prune -f --filter "until=4h"
+ExecStart=/usr/bin/docker run -d \
+  -e PROJECT=ops-shared \
+  -e ROLE=bitcoind \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /bitcoind/configs/haproxy:/bitcoind/configs/haproxy \
+  -v /bitcoind/templates:/bitcoind/templates \
+quay.io/blockstack/bitcoind:python.gcp
+
+[Install]
+WantedBy=multi-user.target
