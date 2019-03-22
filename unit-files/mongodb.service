@@ -1,0 +1,40 @@
+# mongodb.service
+[Unit]
+Description=Mongodb service
+After=docker.service
+Requires=docker.service
+After=create_docker_network.service
+Requires=create_docker_network.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+RuntimeDirectory=bitcoind
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
+ExecStartPre=-/usr/bin/docker stop mongodb
+ExecStartPre=-/usr/bin/docker rm mongodb
+
+ExecStartPre=/usr/bin/docker pull mongo:3.4-jessie
+ExecStart=/usr/bin/docker run \
+  --net=bitcoind \
+  --memory=256m \
+  -p 27017:27017 \
+  --expose 27017 \
+  -v /data/mongodb:/data/db \
+  --name mongodb \
+mongo:3.4-jessie
+
+ExecStop=/usr/bin/docker stop mongodb
+ExecStopPost=/usr/bin/docker rm -f mongodb
+ExecReload=/usr/bin/docker restart mongodb
+
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

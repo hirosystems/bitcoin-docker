@@ -167,6 +167,21 @@
         "group": {
           "name": "root"
         },
+        "path": "/bitcoind/configs/bitcoin/bitcore.config.json",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcore.config.json",
+          "verification": {}
+        },
+        "mode": 420
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
         "path": "/bitcoind/configs/bitcoin/bitcoin.conf.default",
         "user": {
           "name": "root"

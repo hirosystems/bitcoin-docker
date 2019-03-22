@@ -172,6 +172,21 @@
         "group": {
           "name": "root"
         },
+        "path": "/bitcoind/configs/bitcoin/bitcore.config.json",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/configs/bitcoin/bitcore.config.json",
+          "verification": {}
+        },
+        "mode": 420
+      },
+      {
+        "filesystem": "root",
+        "group": {
+          "name": "root"
+        },
         "path": "/bitcoind/configs/bitcoin/bitcoin.conf.default",
         "user": {
           "name": "root"
@@ -306,7 +321,7 @@
         "name": "data.mount"
       },
       {
-        "contents": "# btc.service\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull blockstack/bitcoind:alpine\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  --memory=2560m \\\n  -p 38332:8332 \\\n  -p 38333:8333 \\\n  -p 58333:28332 \\\n  --expose 38332 \\\n  --expose 38333 \\\n  --expose 58333 \\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf \\\n  -e BTC_DATA=/root/.bitcoin \\\n  -e BTC_PID=/run/bitcoind.pid \\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \\\n  -v /data/bitcoin:/root/.bitcoin \\\n  --name bitcoin_core \\\n  blockstack/bitcoind:alpine \\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
+        "contents": "# btc.service\n[Unit]\nDescription=BTC service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcoin_core\nExecStartPre=-/usr/bin/docker rm bitcoin_core\nExecStartPre=/usr/bin/docker pull blockstack/bitcoind:alpine\nExecStart=/usr/bin/docker run \\\n  --net=bitcoind \\\n  --memory=2560m \\\n  -p 38332:8332 \\\n  -p 38333:8333 \\\n  -p 58333:28332 \\\n  --expose 38332 \\\n  --expose 38333 \\\n  --expose 58333 \\\n  -e BTC_CONF=/etc/bitcoin/bitcoin.conf \\\n  -e BTC_DATA=/root/.bitcoin \\\n  -e BTC_PID=/run/bitcoind.pid \\\n  -v /bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \\\n  -v /data/bitcoin:/root/.bitcoin \\\n  --name bitcoin_core \\\n  blockstack/bitcoind:alpine \\\n/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target",
         "enabled": false,
         "name": "btc.service"
       },
