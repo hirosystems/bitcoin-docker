@@ -19,7 +19,7 @@ ExecStartPre=-/usr/bin/docker stop bitcore
 ExecStartPre=-/usr/bin/docker rm bitcore
 
 ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
-ExecStart=/usr/bin/docker run -d \
+ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   --memory=256m \
   -p 38100:8100 \
@@ -30,7 +30,8 @@ ExecStart=/usr/bin/docker run -d \
   -e BITCORE_CONFIG_PATH=/etc/bitcoin/bitcore.config \
   -v /bitcoind/configs/bitcoin/bitcore.config.json:/etc/bitcoin/bitcore.config \
   --name bitcore \
-quay.io/blockstack/bitcoind:bitcore
+  quay.io/blockstack/bitcoind:bitcore \
+npm --prefix=./packages/bitcore-node start
 
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true
