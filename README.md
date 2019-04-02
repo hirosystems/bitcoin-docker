@@ -5,48 +5,65 @@ This is intended as an easy way to run a bitcoin full node without requiring the
 >>**NOTE**: Do **NOT** enable a wallet on this container.
 
 
-## Sources incorporeated
+### About the sources
 
 This build is based on the [bitcoin master branch](https://github.com/bitcoin/bitcoin), since we had no interest in using it for mining or for a wallet. We also forked the [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom) - adding some build scripts to automate it, as well as a [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff) to remove some RPC commands we don't want to expose.
 
 
+## Component parts
 
+The repository defines several Dockerfiles you use to build and run a bitcoin node. The images consume a binary which is referenced from the Dockerfiles via the `BTC_URL` variable.
 
-### Docker Images
+### Docker images
+
 Building this in Debian is easy, but also very bloated and defeats the goal of having a lean container that **just** runs `bitcoind`.
 
+| Image | Description |
 |------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | [Alpine](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.alpine) | Current image is based on this this. Only official Alpine pkgs were used in this image (along with a binary 'bitcoind' download). |
 | [Alpine with glibc](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind) | This was the initial test to see if this idea would work. Runs bitcoin from a `https://bitcoin.org` binary download. |
 | [Debian](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.debian) | Uses the same type of build process as the core Alpine image, this is based off of 'debian:latest' |
 
-### bitcoind
-The binary download is generated outside of this repo, in the forked [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom).
+### bitcoind binary
 
-These builds are also done on Docker containers for Alpine and for Debian.
+The binary download is built outside of this repo, in a [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom) fork. The binary builds are created via Docker containers for Alpine and for Debian. These binary builds:
 
-Essentially we're just applying the [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff), installing required dependencies, and building the binaries. There is also an additional script used to create the tar.gz containing the binary files which we then create a release of in our forked repo.
+* apply the [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff)* 
+* install required dependencies
+* build the binarie
 
-This is the tar.gz file that is downloaded in the Dockerfiles - one for Alpine which is built on Alpine, and one for Debian built on Debian.
+A final, additional script creates the 'tar.gz' file containing the binary from which a release is created in the forked repo.
+
+The Dockerfiles in this `bitcoin` repository downloads the OS-appropriate `tar.gz` file (`BTC_URL`). 
 
 
-### Configuring
-in the `/configs/bitcoin` directory, you'll see 2 .conf files. Once `bitcoin.conf` is setup for some sane defaults on a small VM (it'll take a while to fully sync), along with the default bitcoin.conf sample.
+## Configure and Run the images
 
-It's recommened that you modify the conf to your liking, then mount that into the container:
+In the `/configs/bitcoin` directory, are two `.conf` files. The `bitcoin.conf` file sets some sane defaults on a small VM (The VM will take a while to fully sync). The `bitcoin.conf` file is default sample. 
+
+To build the image:
+
+1. Modify the `conf` to your liking.
+2. Mount the configuration file and the data into the container.
+
+    ```
+      docker run -d \
+        -v <working dir>/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \
+        -v /data/bitcoin:/root/.bitcoin \
+      blockstack/bitcoind:alpine
+    ```
+
+Example: To mount the configuration file without the data:
+
 ```
-  docker run -d \
-    -v <working dir>/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \
-  blockstack/bitcoind:alpine
+docker run -d \
+  -v <working dir>/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \
+blockstack/bitcoind:alpine
 ```
-Likewise, it's also recommended that you mount where the data is stored:
-```
-  docker run -d \
-    -v <working dir>/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf \
-    -v /data/bitcoin:/root/.bitcoin \
-  blockstack/bitcoind:alpine
-```
-Full Example:
+
+
+Example: Full including port and environment specification
+
 ```
 /usr/bin/docker run -d \
   --net=bitcoind \
@@ -69,10 +86,10 @@ Full Example:
 
 
 ### Extras
-Also included in this repo are some packer files to build machine images, as well as some scripts for haproxy.
+Also included in this repo are some 'packer' files to build machine images, as well as some scripts for 'haproxy'.
 
-For packer, the ignition files essentially just setup CoreOS with some services for `btc`, `haproxy`, and a few helper services ( like a docker network ). Feel free to modify to your liking.
+For 'packer', the ignition files just setup CoreOS with some services for `btc`, `haproxy`, and a few helper services ( like a 'docker' network ). Feel free to modify to your liking.
 
-The haproxy script is created to automatically retrieve hosts with a label of `role: bitcoind`, retrieve the public ip, and then using a template it will rewrite the haproxy config adding in any more hosts it finds....followed by an haproxy container restart on the VM.
+The `haproxy` script automatically retrieves 'hosts' with a label of `role: bitcoind` and  the public ip. Then using a template, the script rewrites the 'haproxy' config adding in any more hosts it finds. Finally, it does a haproxy container restart on the VM.
 
-Neither of these are needed to run the containers, but they're there in case anyone can get some use out of them.
+Neither `btc` or `haproxy` are needed to run the containers, but they're there in case anyone can get some use out of them.
