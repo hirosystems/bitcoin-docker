@@ -86,10 +86,10 @@ blockstack/bitcoind:alpine
 
 
 ## Extras: btc, haproxy
-Also included in this repo are some 'packer' files to build machine images, as well as some scripts for 'haproxy'.
+Also included in this repo are some `packer` files to build machine images, as well as some scripts for `haproxy`.
 
-For 'packer', the ignition files just setup CoreOS with some services for `btc`, `haproxy`, and a few helper services ( like a 'docker' network ). Feel free to modify to your liking.
+For `packer`, the ignition files just setup CoreOS with some services for `btc`, `haproxy`, and a few helper services ( like a `docker` network ). Feel free to modify to your liking.
 
-The `haproxy` script automatically retrieves 'hosts' with a label of `role: bitcoind` and  the public ip. Then using a template, the script rewrites the 'haproxy' config adding in any more hosts it finds. Finally, it does a haproxy container restart on the VM.
+The `haproxy` script automatically retrieves hosts with a label of `role: bitcoind` and  the public ip. Then using a template, the script rewrites the `haproxy` config adding in any more hosts it finds. Finally, it launches a `haproxy` container restart on the VM.
 
 Neither `btc` or `haproxy` are needed to run the containers, but they're there in case anyone can get some use out of them.
