@@ -1,29 +1,23 @@
-# Dockerize bitcoind to run a full node
+# Dockerized bitcoind consensus node
 
-### What is this?
-Simply put, we wanted an easy way to run a bitcoin full node without having to go through a lot of the manual steps normally associated with running a full node.
+This is intended as an easy way to run a bitcoin full node without requiring the manual steps normally associated with running a full node.Docker makes a lot of things easier **but not always the most secure**.  This is not meant a secure way to run a `bitcoind` node. Nor is it recommended that you enable a wallet on this buildYou should treat this a consensus node **only**, running release-candidate bitcoind.
 
-Docker makes a lot of things easier *(but not always the most secure)*. There was also a lack of viable, trustworthy images on the repos we looked at.
+>> **NOTE**: I can't stress this enough: do **NOT** enable a wallet on this container.
 
-With that in mind, we also forked the [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom) - adding some build scripts to automate it, as well as a [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff) to remove some RPC commands we don't want to expose.
 
-This build is also based on the bitcoin master branch, since we have zero interest in using it for mining or for a wallet.
+## Sources incorporeated
 
-### What is this Not?
-This is not meant to be a secure way to run a bitcoind node, or nor is it recommended that you enable a wallet on this build.
-You should treat this a consensus node only, running release-candidate bitcoind.
+This build is based on the [bitcoin master branch](https://github.com/bitcoin/bitcoin), since we had no interest in using it for mining or for a wallet. We also forked the [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom) - adding some build scripts to automate it, as well as a [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff) to remove some RPC commands we don't want to expose.
 
-I can't stress this enough: do **NOT** enable a wallet on this container unless you know what you're doing. (i.e. *don't do it*)
+
+
 
 ### Docker Images
-Building this in Debian is easy, but also very bloated and defeats the goal of having a lean container that **just** runs bitcoind.
+Building this in Debian is easy, but also very bloated and defeats the goal of having a lean container that **just** runs `bitcoind`.
 
-1. [Alpine](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.alpine)
-  - Current Image in use is based off of this. Only offical Alpine pkgs are used in this image (along with a binary bitcoind download)
-2. [Alpine with glibc](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind)
-  - This was the initial test to see if this idea would work. Runs bitcoin from a https://bitcoin.org binary download.
-3. [Debian](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.debian):
-  - Uses the same type of build process as the core Alpine image, this is based off of debian:latest
+|[Alpine](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.alpine) | Current Image in use is based off of this. Only offical Alpine pkgs are used in this image (along with a binary `'bitcoind' download) |
+| [Alpine with glibc](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind) | This was the initial test to see if this idea would work. Runs bitcoin from a https://bitcoin.org binary download. |
+|[Debian](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.debian) | Uses the same type of build process as the core Alpine image, this is based off of 'debian:latest' |
 
 
 ### bitcoind
