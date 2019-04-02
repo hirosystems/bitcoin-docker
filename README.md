@@ -15,7 +15,6 @@ This build is based on the [bitcoin master branch](https://github.com/bitcoin/bi
 ### Docker Images
 Building this in Debian is easy, but also very bloated and defeats the goal of having a lean container that **just** runs `bitcoind`.
 
-|  |  |
 |------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | [Alpine](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.alpine) | Current image is based on this this. Only official Alpine pkgs were used in this image (along with a binary 'bitcoind' download). |
 | [Alpine with glibc](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind) | This was the initial test to see if this idea would work. Runs bitcoin from a `https://bitcoin.org` binary download. |
