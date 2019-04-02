@@ -2,7 +2,7 @@
 
 This is intended as an easy way to run a bitcoin full node without requiring the manual steps normally associated with running a full node.Docker makes a lot of things easier **but not always the most secure**.  This is not meant a secure way to run a `bitcoind` node. Nor is it recommended that you enable a wallet on this buildYou should treat this a consensus node **only**, running release-candidate bitcoind.
 
->> **NOTE**: I can't stress this enough: do **NOT** enable a wallet on this container.
+>>**NOTE**: Do **NOT** enable a wallet on this container.
 
 
 ## Sources incorporeated
@@ -15,6 +15,7 @@ This build is based on the [bitcoin master branch](https://github.com/bitcoin/bi
 ### Docker Images
 Building this in Debian is easy, but also very bloated and defeats the goal of having a lean container that **just** runs `bitcoind`.
 
+|----|--|
 |[Alpine](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.alpine) | Current Image in use is based off of this. Only offical Alpine pkgs are used in this image (along with a binary `'bitcoind' download) |
 | [Alpine with glibc](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind) | This was the initial test to see if this idea would work. Runs bitcoin from a https://bitcoin.org binary download. |
 |[Debian](https://github.com/blockstackpbc/bitcoin-docker/blob/master/Dockerfile-bitcoind.debian) | Uses the same type of build process as the core Alpine image, this is based off of 'debian:latest' |
