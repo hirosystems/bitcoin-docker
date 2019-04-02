@@ -1,11 +1,11 @@
-# Dockerized bitcoind consensus node
+# Dockerized bitcoind Consensus Node
 
-This is intended as an easy way to run a bitcoin full node without requiring the manual steps normally associated with running a full node.Docker makes a lot of things easier **but not always the most secure**.  This is not meant a secure way to run a `bitcoind` node. Nor is it recommended that you enable a wallet on this buildYou should treat this a consensus node **only**, running release-candidate bitcoind.
+This is intended as an easy way to run a bitcoin consensus node without requiring the manual steps normally associated with running a full node. Docker makes a lot of things easier **but not always the most secure**.  This implementaiton is not meant a secure way to run a `bitcoind` node. Nor is it recommended that you enable a wallet on this build. You should treat this a consensus node **only**, running release-candidate `bitcoind`.
 
 >>**NOTE**: Do **NOT** enable a wallet on this container.
 
 
-### About the sources
+### Some background
 
 This build is based on the [bitcoin master branch](https://github.com/bitcoin/bitcoin), since we had no interest in using it for mining or for a wallet. We also forked the [bitcoin core repo](https://github.com/blockstackpbc/bitcoin/tree/blockstackpbc-custom) - adding some build scripts to automate it, as well as a [diff](https://github.com/blockstackpbc/bitcoin/blob/blockstackpbc-custom/no_rpc.diff) to remove some RPC commands we don't want to expose.
 
@@ -32,7 +32,7 @@ The binary download is built outside of this repo, in a [bitcoin core repo](http
 * install required dependencies
 * build the binarie
 
-A final, additional script creates the 'tar.gz' file containing the binary from which a release is created in the forked repo.
+A final, additional script creates the `tar.gz` file containing the binary from which a release is created in the forked repo.
 
 The Dockerfiles in this `bitcoin` repository downloads the OS-appropriate `tar.gz` file (`BTC_URL`). 
 
@@ -53,7 +53,7 @@ To build the image:
       blockstack/bitcoind:alpine
     ```
 
-Example: To mount the configuration file without the data:
+**Example**: To mount the configuration file without the data:
 
 ```
 docker run -d \
@@ -62,7 +62,7 @@ blockstack/bitcoind:alpine
 ```
 
 
-Example: Full including port and environment specification
+**Example**: Full including port and environment specification
 
 ```
 /usr/bin/docker run -d \
@@ -85,7 +85,7 @@ Example: Full including port and environment specification
 ```
 
 
-### Extras
+## Extras: btc, haproxy
 Also included in this repo are some 'packer' files to build machine images, as well as some scripts for 'haproxy'.
 
 For 'packer', the ignition files just setup CoreOS with some services for `btc`, `haproxy`, and a few helper services ( like a 'docker' network ). Feel free to modify to your liking.
