@@ -6,12 +6,12 @@
           "chainSource": "p2p",
           "trustedPeers": [
             {
-              "host": "35.245.192.103",
+              "host": "bitcoin_core.bitcoind",
               "port": 8333
             }
           ],
           "rpc": {
-            "host": "35.245.192.103",
+            "host": "bitcoin_core.bitcoind",
             "port": 8332,
             "username": "blockstackpbc",
             "password": "blockstackpbc"

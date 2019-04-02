@@ -4,8 +4,8 @@
 Description=Check IPs for haproxy Timer
 
 [Timer]
-OnUnitActiveSec=60
 OnCalendar=*:0/10
+Persistent=true
 
 [Install]
 WantedBy=timers.target

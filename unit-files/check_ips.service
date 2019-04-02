@@ -6,7 +6,6 @@ ConditionPathExists=/bitcoind/templates/haproxy.jinja2
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 EnvironmentFile=/etc/environment
 ExecStart=/usr/bin/docker container prune -f --filter "until=4h"
 ExecStart=/usr/bin/docker run -d \
