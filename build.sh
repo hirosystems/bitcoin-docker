@@ -17,7 +17,7 @@ docker push quay.io/blockstack/bitcoind:debian
 docker push blockstack/bitcoind:debian
 echo ""
 echo ""
-echo "Building Bitcore"
+echo "Building Bitcore.alpine"
 git clone https://github.com/bitpay/bitcore .
 cp -R Dockerfile-bitcore bitcore/Dockerfile-bitcore.alpine
 cd bitcore
@@ -25,5 +25,13 @@ docker build -f Dockerfile-bitcore.alpine -t quay.io/blockstack/bitcoind:bitcore
 docker push quay.io/blockstack/bitcoind:bitcore
 docker push blockstack/bitcoind:bitcore
 cd .. && rm -rf bitcore
+# echo "Building Bitcore.carbon"
+# git clone https://github.com/bitpay/bitcore .
+# cp -R Dockerfile-bitcore bitcore/Dockerfile-bitcore.carbon
+# cd bitcore
+# docker build -f Dockerfile-bitcore.carbon -t quay.io/blockstack/bitcoind:bitcore-carbon -t blockstack/bitcoind:bitcore-carbon .
+# docker push quay.io/blockstack/bitcoind:bitcore
+# docker push blockstack/bitcoind:bitcore
+# cd .. && rm -rf bitcore
 echo "Done"
 echo ""

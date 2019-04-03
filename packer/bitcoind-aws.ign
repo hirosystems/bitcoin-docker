@@ -331,6 +331,11 @@
         "name": "bitcore.service"
       },
       {
+        "contents": "# bitcore-insight.service\n[Unit]\nDescription=Bitcore Insight service\nAfter=docker.service\nAfter=bitcore.service\nRequires=docker.service\nRequires=bitcore.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nRuntimeDirectory=bitcoind\nPrivateTmp=true\nProtectSystem=full\nNoNewPrivileges=true\nPrivateDevices=true\n\nExecStartPre=-/usr/bin/docker stop bitcore-insight\nExecStartPre=-/usr/bin/docker rm bitcore-insight\nExecStop=-/usr/bin/docker stop bitcore-insight\n\nExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore-alpine\nExecStart=/usr/bin/docker run \\\n  --net=bitcoind \\\n  -p 34200:4200 \\\n  --expose 34200 \\\n  -e NETWORK=mainnet \\\n  -e CHAIN=BTC \\\n  -e ENV=prod \\\n  -e API_PREFIX=http://bitcore.bitcoind:3000/api \\\n  -v /bitcoind/configs/bitcoin/proxy.conf.override.js:/bitcore/packages/insight/proxy.conf.override.js \\\n  -w /bitcore/packages/insight \\\n  --name bitcore-insight \\\n  quay.io/blockstack/bitcoind:bitcore-alpine \\\nsh -c \"./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0\"\n\n# Deny the creation of writable and executable memory mappings.\nMemoryDenyWriteExecute=true\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "bitcore-insight.service"
+      },
+      {
         "contents": "# mongodb.service\n[Unit]\nDescription=Mongodb service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nExecStartPre=-/usr/bin/docker stop mongodb\nExecStartPre=-/usr/bin/docker rm mongodb\n\nExecStartPre=/usr/bin/docker pull mongo:3.4-jessie\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  --memory=1024m \\\n  -p 27017:27017 \\\n  --expose 27017 \\\n  -v /data/mongodb:/data/db \\\n  --name mongodb \\\nmongo:3.4-jessie\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "mongodb.service"

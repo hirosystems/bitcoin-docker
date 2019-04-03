@@ -1,0 +1,43 @@
+# bitcore-insight.service
+[Unit]
+Description=Bitcore Insight service
+After=docker.service
+After=bitcore.service
+Requires=docker.service
+Requires=bitcore.service
+After=create_docker_network.service
+Requires=create_docker_network.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+RuntimeDirectory=bitcoind
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
+ExecStartPre=-/usr/bin/docker stop bitcore-insight
+ExecStartPre=-/usr/bin/docker rm bitcore-insight
+ExecStop=-/usr/bin/docker stop bitcore-insight
+
+ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore-alpine
+ExecStart=/usr/bin/docker run \
+  --net=bitcoind \
+  -p 34200:4200 \
+  --expose 34200 \
+  -e NETWORK=mainnet \
+  -e CHAIN=BTC \
+  -e ENV=prod \
+  -e API_PREFIX=http://bitcore.bitcoind:3000/api \
+  -v /bitcoind/configs/bitcoin/proxy.conf.override.js:/bitcore/packages/insight/proxy.conf.override.js \
+  -w /bitcore/packages/insight \
+  --name bitcore-insight \
+  quay.io/blockstack/bitcoind:bitcore-alpine \
+sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0"
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target
