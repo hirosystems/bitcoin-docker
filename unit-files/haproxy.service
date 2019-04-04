@@ -18,10 +18,17 @@ ExecStart=/usr/bin/docker run -d \
   -m 128m \
   -p 8332:8332 \
   -p 8333:8333 \
+  -p 80:80 \
+  -p 443:443 \
+  -p 443:443 \
   -p 1024:1024 \
+  -p 3000:3000 \
+  --expose=80 \
+  --expose=443 \
+  --expose=1024 \
+  --expose=3000 \
   --expose=8332 \
   --expose=8333 \
-  --expose=1024 \
   -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \
   --name bitcoin_haproxy \
   haproxy:alpine \

@@ -15,8 +15,6 @@ ExecStartPre=-/usr/bin/docker rm mongodb
 ExecStartPre=/usr/bin/docker pull mongo:3.4-jessie
 ExecStart=/usr/bin/docker run -d \
   --net=bitcoind \
-  --memory=1024m \
-  -p 27017:27017 \
   --expose 27017 \
   -v /data/mongodb:/data/db \
   --name mongodb \

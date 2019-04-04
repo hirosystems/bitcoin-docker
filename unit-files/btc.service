@@ -5,7 +5,6 @@ After=docker.service
 Requires=docker.service
 After=create_docker_network.service
 Requires=create_docker_network.service
-ConditionPathExists=/opt/bin/start_bitcoind.sh
 
 [Service]
 TimeoutStartSec=5
@@ -36,6 +35,7 @@ ExecStart=/usr/bin/docker run \
   --name bitcoin_core \
   quay.io/blockstack/bitcoind:alpine \
 /usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin
+
 ExecStop=/bin/docker stop bitcoin_core
 ExecStopPost=/bin/docker rm -f bitcoin_core
 ExecReload=/bin/docker restart bitcoin_core

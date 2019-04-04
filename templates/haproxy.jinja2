@@ -126,3 +126,4 @@ backend Abuse
 # keep 100k entries, expiring 30m
 # add to list if IP sends more than 10 requests in 10s
   stick-table type ip size 100K expire 30m store gpc0,http_req_rate(10s)00K expire 30m store gpc0,http_req_rate(10s)
+# end

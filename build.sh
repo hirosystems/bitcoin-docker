@@ -18,7 +18,7 @@ docker push blockstack/bitcoind:debian
 echo ""
 echo ""
 echo "Building Bitcore.alpine"
-git clone https://github.com/bitpay/bitcore .
+git clone --single-branch --branch v8.0.0 https://github.com/bitpay/bitcore .
 cp -R Dockerfile-bitcore bitcore/Dockerfile-bitcore.alpine
 cd bitcore
 docker build -f Dockerfile-bitcore.alpine -t quay.io/blockstack/bitcoind:bitcore -t blockstack/bitcoind:bitcore .

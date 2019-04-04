@@ -21,7 +21,7 @@ ExecStartPre=-/usr/bin/docker stop bitcore-insight
 ExecStartPre=-/usr/bin/docker rm bitcore-insight
 ExecStop=-/usr/bin/docker stop bitcore-insight
 
-ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore-alpine
+ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   -p 34200:4200 \
@@ -33,7 +33,7 @@ ExecStart=/usr/bin/docker run \
   -v /bitcoind/configs/bitcoin/proxy.conf.override.js:/bitcore/packages/insight/proxy.conf.override.js \
   -w /bitcore/packages/insight \
   --name bitcore-insight \
-  quay.io/blockstack/bitcoind:bitcore-alpine \
+  quay.io/blockstack/bitcoind:bitcore \
 sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0"
 
 # Deny the creation of writable and executable memory mappings.
