@@ -1,0 +1,123 @@
+version: "3.3"
+
+services:
+  core:
+    image: quay.io/blockstack/bitcoind:alpine
+    restart: always
+    resources:
+      limits:
+        memory: 2048M
+    volumes:
+      - "/bitcoind/configs/bitcoin/bitcoin.conf:/etc/bitcoin/bitcoin.conf"
+      - "/data/bitcoin:/root/.bitcoin"
+    ports:
+      - "38332:8332"
+      - "38333:8333"
+      - "58333:28332"
+    expose:
+      - "38100"
+      - "33000"
+      - "58333"
+    expose:
+      - "38100"
+      - "33000"
+    environment:
+      BTC_CONF: "/etc/bitcoin/bitcoin.conf"
+      BTC_DATA: "/root/.bitcoin"
+      BTC_PID: "/run/bitcoind.pid"
+    networks:
+      - bitcoind
+    command: /usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin
+
+  bitcore:
+    image: quay.io/blockstack/bitcoind:bitcore
+    restart: always
+    resources:
+      limits:
+        memory: 512M
+    volumes:
+      - "/bitcoind/configs/bitcoin/bitcore.config.json:/bitcore/bitcore.config.json"
+    ports:
+      - "38100:8100"
+      - "33000:3000"
+    expose:
+      - "38100"
+      - "33000"
+    links:
+      - mongodb
+      - btc
+    depends_on:
+      - mongodb
+      - btc
+    environment:
+      DB_HOST: "mongodb.bitcoind"
+      BITCORE_CONFIG_PATH: "/bitcore/bitcore.config.json"
+    networks:
+      - bitcoind
+    working_dir: /bitcore/packages/insight
+    command: sh -c "npm run tsc && node build/src/server.js"
+
+  bitcore-insight:
+    image: quay.io/blockstack/bitcoind:bitcore
+    restart: always
+    environment:
+      NETWORK: "mainnet"
+      CHAIN: "BTC"
+      ENV: "prod"
+      API_PREFIX: "http://bitcore.bitcoind:3000/api"
+    volumes:
+      - "/bitcoind/configs/bitcoin/proxy.conf.override.js:/bitcore/packages/insight/proxy.conf.override.js"
+    ports:
+      - "34200:4200"
+    expose:
+      - "34200"
+    links:
+      - bitcore
+    networks:
+      - bitcoind
+    working_dir: /bitcore/packages/insight
+    command: sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0"
+
+  mongodb:
+    image: mongo:3.4-jessie
+    restart: always
+    volumes:
+      - "/data/mongodb:/data/db"
+    expose:
+      - "27017"
+    networks:
+      - bitcoind
+
+  haproxy:
+    image: haproxy:alpine
+    restart: always
+    volumes:
+      - "/bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg"
+    resources:
+      limits:
+        memory: 128M
+    ports:
+      - "80:80"
+      - "443:443"
+      - "1024:1024"
+      - "3000:3000"
+      - "8332:8332"
+      - "8333:8333"
+    expose:
+      - "80"
+      - "443"
+      - "1024"
+      - "3000"
+      - "8332"
+      - "8333"
+    links:
+      - btc
+      - bitcore
+      - bitcore-insight
+    networks:
+      - bitcoind
+    command: /usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L ${HOSTNAME}
+
+networks:
+  bitcoind:
+    driver: bridge
