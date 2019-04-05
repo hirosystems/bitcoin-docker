@@ -1,0 +1,13 @@
+# clone_repo.service
+[Unit]
+Description=Checkout bitcoin-docker Repo
+ConditionPathExists=!/bitcoind2
+Before=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/git clone -b master --single-branch https://github.com/blockstackpbc/bitcoin-docker /bitcoind2
+
+[Install]
+WantedBy=multi-user.target

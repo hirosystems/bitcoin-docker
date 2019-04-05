@@ -1,0 +1,10 @@
+# pull_repo.timer
+[Unit]
+Description=Execute git pull every hour
+
+[Timer]
+OnCalendar=*-*-* *:00:00
+Persistent=true
+
+[Install]
+WantedBy=multi-user.target

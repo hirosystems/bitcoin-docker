@@ -359,6 +359,21 @@
         "contents": "# check_ips.timer\n[Unit]\n\nDescription=Check IPs for haproxy Timer\n\n[Timer]\nOnCalendar=*:0/10\nPersistent=true\n\n[Install]\nWantedBy=timers.target\n",
         "enabled": true,
         "name": "check_ips.timer"
+      },
+      {
+        "contents": "# clone_repo.service\n[Unit]\nDescription=Checkout bitcoin-docker Repo\nConditionPathExists=!/bitcoind\nBefore=docker.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/usr/bin/git clone -b master --single-branch https://github.com/blockstackpbc/bitcoin-docker /bitcoind\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "clone_repo.service"
+      },
+      {
+        "contents": "# pull_repo.service\n[Unit]\nDescription=Update bitcoin-docker Repo\nConditionPathExists=/bitcoind\nRequires=clone_repo.service\n\n[Service]\nType=simple\nExecStart=/usr/bin/git -C /bitcoind pull\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "pull_repo.service"
+      },
+      {
+        "contents": "# pull_repo.timer\n[Unit]\nDescription=Execute git pull every hour\n\n[Timer]\nOnCalendar=*-*-* *:00:00\nPersistent=true\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "pull_repo.timer"
       }
     ]
   }

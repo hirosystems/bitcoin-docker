@@ -1,0 +1,12 @@
+# pull_repo.service
+[Unit]
+Description=Update bitcoin-docker Repo
+ConditionPathExists=/bitcoind2
+Requires=clone_repo.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/git -C /bitcoind2 pull
+
+[Install]
+WantedBy=multi-user.target
