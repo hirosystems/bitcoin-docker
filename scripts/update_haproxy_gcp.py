@@ -22,10 +22,10 @@ else:
     template_source = "haproxy.bitcoind.jinja2"
 template_dest = "haproxy.cfg." + str(epoch)
 haproxy_cfg = "haproxy.cfg"
-print("Haproxy config: %s", haproxy_cfg)
-print("Haproxy temp config: %s", template_dest)
+print("Haproxy config: %s" % (haproxy_cfg))
+print("Haproxy temp config: %s" % (template_dest))
 container_name = "bitcoin_haproxy"
-
+return_code = 0
 
 def get_sha512(file):
     with open(file, "rb") as f:
@@ -158,7 +158,7 @@ if __name__ == '__main__':
                     copymode(saved_config, config)
                     if not restart_haproxy(client, container_name):
                         print("Restarting %s failed (2)", container_name)
-                        exit(2)
-        print("Deleting temp file %s" % (new_config))
-        os.remove(new_config)
-    exit(0)
+                        return_code = 2
+    print("Deleting temp file %s" % (new_config))
+    os.remove(new_config)
+    exit(return_code)
