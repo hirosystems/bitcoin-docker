@@ -16,6 +16,7 @@ ExecStartPre=/usr/bin/docker pull mongo:3.4-jessie
 ExecStart=/usr/bin/docker run -d \
   --net=bitcoind \
   --expose 27017 \
+  -p "27017:27017 \
   -v /data/mongodb:/data/db \
   --name mongodb \
 mongo:3.4-jessie

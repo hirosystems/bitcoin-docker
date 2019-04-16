@@ -8,12 +8,17 @@ ConditionPathExists=/bitcoind/templates/haproxy.jinja2
 Type=oneshot
 EnvironmentFile=/etc/environment
 ExecStart=/usr/bin/docker container prune -f --filter "until=4h"
+ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:python.gcp
 ExecStart=/usr/bin/docker run -d \
   -e PROJECT=ops-shared \
   -e ROLE=bitcoind \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /bitcoind/configs/haproxy:/bitcoind/configs/haproxy \
   -v /bitcoind/templates:/bitcoind/templates \
+  -v /var/run/dbus:/var/run/dbus \
+  -v /run/systemd:/run/systemd \
+  -v /usr/bin/systemctl:/usr/bin/systemctl \
+  -v /etc/systemd/system:/etc/systemd/system \
 quay.io/blockstack/bitcoind:python.gcp
 
 [Install]

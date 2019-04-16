@@ -7,15 +7,23 @@ import os
 import os.path
 import hashlib
 import docker
+import time
 from shutil import copyfile, copymode
 
 
 zones = []
 ips = {}
-template_source = "haproxy.jinja2"
-template_dest = "haproxy.cfg.new"
+client = docker.APIClient(base_url='unix://var/run/docker.sock')
+epoch = time.time()
+bitcore_check = client.containers(filters={'name': 'bitcore'})
+if len(bitcore_check) > 0 and bitcore_check[0]['State'] == 'running':
+    template_source = "haproxy.bitcore.jinja2"
+else:
+    template_source = "haproxy.bitcoind.jinja2"
+template_dest = "haproxy.cfg." + str(epoch)
 haproxy_cfg = "haproxy.cfg"
-client = docker.from_env()
+print("Haproxy config: %s", haproxy_cfg)
+print("Haproxy temp config: %s", template_dest)
 container_name = "bitcoin_haproxy"
 
 
@@ -27,9 +35,7 @@ def get_sha512(file):
     return False
 
 
-def restart_haproxy(container_name):
-    client = docker.APIClient(base_url='unix://var/run/docker.sock')
-    pre_container = client.containers(filters={'name': container_name})
+def restart_haproxy(client, container_name):
     pre_container = client.containers(filters={'name': container_name})
     if len(pre_container) > 0 and pre_container[0]['State'] == 'running':
         print("Restarting Container: %s" % (container_name))
@@ -62,7 +68,7 @@ def write_template(template_path, template_source, template_dest, template_value
     jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader([template_path]), trim_blocks=True)
     template = jinja2_env.get_template(template_source)
     result = template.render(hosts=template_values)
-    with os.fdopen(os.open(template_dest, os.O_WRONLY | os.O_CREAT, 0o644), 'w') as handle:
+    with os.fdopen(os.open(template_dest, os.O_WRONLY | os.O_EXCL | os.O_CREAT, 0o644), 'w') as handle:
         handle.write(result)
         handle.close()
     if os.path.isfile(template_dest) and os.access(template_dest, os.R_OK):
@@ -145,11 +151,14 @@ if __name__ == '__main__':
                 print("\t - copying haproxy.cfg.new -> %s" % (config))
                 copyfile(new_config, config)
                 copymode(new_config, config)
-                if not restart_haproxy(container_name):
-                    print("Container %s restart failed" % (container_name))
+                if not restart_haproxy(client, container_name):
+                    print("Restarting %s failed (2)", container_name)
                     print("\t - replacing config with %s" % (saved_config))
                     copyfile(saved_config, config)
                     copymode(saved_config, config)
-                    if not restart_haproxy(container_name):
+                    if not restart_haproxy(client, container_name):
+                        print("Restarting %s failed (2)", container_name)
                         exit(2)
+        print("Deleting temp file %s" % (new_config))
+        os.remove(new_config)
     exit(0)

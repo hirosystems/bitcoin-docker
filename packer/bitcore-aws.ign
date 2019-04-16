@@ -100,7 +100,12 @@
         "mode": 493
       }
     ],
-    "disks": [],
+    "disks": [
+      {
+        "device": "/dev/xvdf",
+        "wipeTable": true
+      }
+    ],
     "files": [
       {
         "filesystem": "root",
@@ -217,7 +222,7 @@
           "name": "root"
         },
         "contents": {
-          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/templates/haproxy.jinja2",
+          "source": "https://raw.githubusercontent.com/blockstackpbc/bitcoin-docker/master/templates/haproxy.bitcore.jinja2",
           "verification": {}        },
         "mode": 420
       },
@@ -282,7 +287,17 @@
         "mode": 420
       }
     ],
-    "filesystems": []
+    "filesystems": [
+      {
+        "mount": {
+          "device": "/dev/xvdf",
+          "format": "xfs",
+          "label": "DATA",
+          "wipeFilesystem": true
+        },
+        "name": "data"
+      }
+    ]
   },
   "systemd": {
     "units": [
@@ -302,7 +317,7 @@
       },
       {
         "contents": "[Unit]\nDescription=Mount Local Disk to /data\n\n[Mount]\nWhat=/dev/sdb1\nWhere=/data\n[Install]\nWantedBy=local-fs.target\n\n",
-        "enabled": false,
+        "enabled": true,
         "name": "data.mount"
       },
       {
@@ -321,7 +336,7 @@
         "name": "bitcore-insight.service"
       },
       {
-        "contents": "# mongodb.service\n[Unit]\nDescription=Mongodb service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nExecStartPre=-/usr/bin/docker stop mongodb\nExecStartPre=-/usr/bin/docker rm mongodb\n\nExecStartPre=/usr/bin/docker pull mongo:3.4-jessie\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  --expose 27017 \\\n  -v /data/mongodb:/data/db \\\n  --name mongodb \\\nmongo:3.4-jessie\n\n[Install]\nWantedBy=multi-user.target\n",
+        "contents": "# mongodb.service\n[Unit]\nDescription=Mongodb service\nAfter=docker.service\nRequires=docker.service\nAfter=create_docker_network.service\nRequires=create_docker_network.service\n\n[Service]\nTimeoutStartSec=0\nRestart=on-failure\nExecStartPre=-/usr/bin/docker stop mongodb\nExecStartPre=-/usr/bin/docker rm mongodb\n\nExecStartPre=/usr/bin/docker pull mongo:3.4-jessie\nExecStart=/usr/bin/docker run -d \\\n  --net=bitcoind \\\n  --expose 27017 \\\n  -p \"27017:27017\" \\\n  -v /data/mongodb:/data/db \\\n  --name mongodb \\\nmongo:3.4-jessie\n\n[Install]\nWantedBy=multi-user.target\n",
         "enabled": true,
         "name": "mongodb.service"
       },

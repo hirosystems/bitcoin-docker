@@ -1,0 +1,129 @@
+global
+  log stdout format short daemon
+  maxconn 4096
+
+defaults
+  log global
+  mode  http
+  timeout connect 50000ms
+  timeout client  50000ms
+  timeout server  50000ms
+  errorfile 400 /usr/local/etc/haproxy/errors/400.http
+  errorfile 403 /usr/local/etc/haproxy/errors/403.http
+  errorfile 408 /usr/local/etc/haproxy/errors/408.http
+  errorfile 500 /usr/local/etc/haproxy/errors/500.http
+  errorfile 502 /usr/local/etc/haproxy/errors/502.http
+  errorfile 503 /usr/local/etc/haproxy/errors/503.http
+  errorfile 504 /usr/local/etc/haproxy/errors/504.http
+  default-server init-addr none
+
+resolvers docker_resolver
+  nameserver dns 127.0.0.11:53
+
+#peers haproxy_peers
+#  peer bitcoin_core bitcoin_core.bitcoind:1024
+#  {% for key, value in hosts.items() -%}
+#  peer {{ key|e }} {{ value|e }}:1024
+#  {% endfor %}
+
+frontend bitcoind_rpc
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:8332
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 25
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcoind_rpc
+
+frontend bitcoind_p2p
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:8333
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 10
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcoind_p2p
+
+frontend bitcore
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:3000
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 10
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcore
+
+frontend bitcore-insight
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:80
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 10
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcore-insight
+
+backend bitcoind_rpc
+  mode tcp
+  log global
+  balance leastconn
+  server bitcoin_core bitcoin_core.bitcoind:8332 maxconn 100 check port 8332 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:38332 maxconn 100 check port 38332 check inter 10s
+  {% endfor %}
+
+backend bitcoind_p2p
+  mode tcp
+  log global
+  balance leastconn
+  server bitcoin_core bitcoin_core.bitcoind:8333 maxconn 100 check port 8333 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:38333 maxconn 100 check port 38333 check inter 10s
+  {% endfor %}
+
+backend bitcore
+  mode tcp
+  log global
+  balance leastconn
+  server bitcore bitcore.bitcoind:3000 maxconn 100 check port 3000 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:33000 maxconn 100 check port 33000 check inter 10s
+  {% endfor %}
+
+backend bitcore-insight
+  mode tcp
+  log global
+  balance leastconn
+  server bitcore bitcore-insight.bitcoind:4200 maxconn 100 check port 4200 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:34200 maxconn 100 check port 34200 check inter 10s
+  {% endfor %}
+
+backend Abuse
+# keep 100k entries, expiring 30m
+# add to list if IP sends more than 10 requests in 10s
+  stick-table type ip size 100K expire 30m store gpc0,http_req_rate(10s)00K expire 30m store gpc0,http_req_rate(10s)
+# end
