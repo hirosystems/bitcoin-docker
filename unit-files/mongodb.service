@@ -13,13 +13,17 @@ ExecStartPre=-/usr/bin/docker stop mongodb
 ExecStartPre=-/usr/bin/docker rm mongodb
 
 ExecStartPre=/usr/bin/docker pull mongo:3.4-jessie
-ExecStart=/usr/bin/docker run -d \
+ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   --expose 27017 \
   -p "27017:27017 \
   -v /data/mongodb:/data/db \
   --name mongodb \
 mongo:3.4-jessie
+
+ExecStop=/bin/docker stop mongodb
+ExecStopPost=/bin/docker rm -f mongodb
+ExecReload=/bin/docker restart mongodb
 
 [Install]
 WantedBy=multi-user.target

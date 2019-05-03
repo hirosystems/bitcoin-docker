@@ -21,8 +21,6 @@ PrivateDevices=true
 
 ExecStartPre=-/usr/bin/docker stop bitcore
 ExecStartPre=-/usr/bin/docker rm bitcore
-ExecStop=-/usr/bin/docker stop bitcore
-
 ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
@@ -38,6 +36,10 @@ ExecStart=/usr/bin/docker run \
   --name bitcore \
   quay.io/blockstack/bitcoind:bitcore \
 sh -c "npm run tsc && node build/src/server.js"
+
+ExecStop=/bin/docker stop bitcore
+ExecStopPost=/bin/docker rm -f bitcore
+ExecReload=/bin/docker restart bitcore
 
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true

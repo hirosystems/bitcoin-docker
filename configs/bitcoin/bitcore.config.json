@@ -7,14 +7,14 @@
           "trustedPeers": [
             {
               "host": "bitcoin_core.bitcoind",
-              "port": 8333
+              "port": "8333"
             }
           ],
           "rpc": {
             "host": "bitcoin_core.bitcoind",
-            "port": 8332,
-            "username": "blockstackpbc",
-            "password": "blockstackpbc"
+            "port": "8332",
+            "username": "blockstack",
+            "password": "blockstacksystem"
           }
         }
       }

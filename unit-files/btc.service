@@ -15,6 +15,7 @@ ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
 
+ExecStartPre=-/usr/bin/docker stop bitcoin_core
 ExecStartPre=/bin/sleep 1
 ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:alpine
 ExecStart=/usr/bin/docker run \
