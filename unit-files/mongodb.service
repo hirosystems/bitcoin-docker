@@ -11,7 +11,8 @@ Before=bitcore_insight.service
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
-ExecStartPre=-/usr/bin/docker stop mongodb
+RemainAfterExit=yes
+RestartSec=5ExecStartPre=-/usr/bin/docker stop mongodb
 ExecStartPre=-/usr/bin/docker rm mongodb
 
 ExecStartPre=-/usr/bin/docker pull mongo:3.4-jessie

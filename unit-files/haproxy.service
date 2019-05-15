@@ -16,7 +16,8 @@ After=pull_repo.service
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
-
+RemainAfterExit=yes
+RestartSec=5
 ExecStartPre=-/usr/bin/docker stop haproxy
 ExecStartPre=-/usr/bin/docker pull haproxy:alpine
 ExecStart=/usr/bin/docker run \
