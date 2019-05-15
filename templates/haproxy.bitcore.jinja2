@@ -71,21 +71,21 @@ frontend bitcore
   tcp-request connection reject if abuse_cnt
   default_backend bitcore
 
-frontend bitcore-insight
-  mode tcp
-  option tcplog
-  log global
-  maxconn 4096
-  bind *:80
-  http-request set-header Host bitcore.blockstack.xyz
-# ACL function declarations
-  acl is_abuse src_http_req_rate(Abuse) ge 10
-  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
-  acl abuse_cnt src_get_gpc0(Abuse) gt 0
-# Rules
-  tcp-request connection track-sc0 src table Abuse
-  tcp-request connection reject if abuse_cnt
-  default_backend bitcore-insight
+#frontend bitcore-insight
+#  mode tcp
+#  option tcplog
+#  log global
+#  maxconn 4096
+#  bind *:80
+#  http-request set-header Host bitcore.blockstack.xyz
+## ACL function declarations
+#  acl is_abuse src_http_req_rate(Abuse) ge 10
+#  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+#  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+## Rules
+#  tcp-request connection track-sc0 src table Abuse
+#  tcp-request connection reject if abuse_cnt
+#  default_backend bitcore-insight
 
 backend bitcoind_rpc
   mode tcp
@@ -114,14 +114,14 @@ backend bitcore
   server {{ key|e }} {{ value|e }}:33000 maxconn 100 check port 33000 check inter 10s
   {% endfor %}
 
-backend bitcore-insight
-  mode tcp
-  log global
-  balance leastconn
-  server bitcore bitcore-insight.bitcoind:4200 maxconn 100 check port 4200 check inter 10s resolvers docker_resolver resolve-prefer ipv4
-  {% for key, value in hosts.items() -%}
-  server {{ key|e }} {{ value|e }}:34200 maxconn 100 check port 34200 check inter 10s
-  {% endfor %}
+#backend bitcore-insight
+#  mode tcp
+#  log global
+#  balance leastconn
+#  server bitcore bitcore-insight.bitcoind:4200 maxconn 100 check port 4200 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+#  {% for key, value in hosts.items() -%}
+#  server {{ key|e }} {{ value|e }}:34200 maxconn 100 check port 34200 check inter 10s
+#  {% endfor %}
 
 backend Abuse
 # keep 100k entries, expiring 30m

@@ -2,20 +2,14 @@
 [Unit]
 Description=HAproxy service for btc
 Requires=docker.service
-Requires=bitcoin_core.service
-#Requires=bitcore.service
-#Requires=bitcore_insight.service
 Requires=create_docker_network.service
 After=docker.service
-After=bitcoin_core.service
 After=create_docker_network.service
-#After=bitcore.service
-#After=bitcore_insight.service
-After=pull_repo.service
+
 
 [Service]
 TimeoutStartSec=0
-Restart=on-failure
+Restart=always
 RemainAfterExit=yes
 RestartSec=5
 ExecStartPre=-/usr/bin/docker stop haproxy

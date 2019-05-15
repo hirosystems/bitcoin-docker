@@ -7,14 +7,11 @@ Requires=bitcoin_core.service
 Requires=create_docker_network.service
 Before=haproxy.service
 After=docker.service
-After=mongodb.service
-After=bitcoin_core.service
 After=create_docker_network.service
-After=pull_repo.service
 
 [Service]
 TimeoutStartSec=0
-Restart=on-failure
+Restart=always
 RemainAfterExit=yes
 RestartSec=5
 RuntimeDirectory=bitcoind
