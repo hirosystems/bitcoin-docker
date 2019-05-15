@@ -3,10 +3,10 @@
 Description=BTC service
 Requires=docker.service
 Requires=create_docker_network.service
-Requires=mongodb.service
 Before=haproxy.service
 After=docker.service
 After=create_docker_network.service
+After=pull_repo.service
 
 [Service]
 TimeoutStartSec=5

@@ -77,6 +77,7 @@ frontend bitcore-insight
   log global
   maxconn 4096
   bind *:80
+  http-request set-header bitcore.blockstack.xyz
 # ACL function declarations
   acl is_abuse src_http_req_rate(Abuse) ge 10
   acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0

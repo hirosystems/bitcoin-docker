@@ -3,6 +3,7 @@
 Description=Checkout bitcoin-docker Repo
 ConditionPathExists=!/bitcoind
 Before=docker.service
+Before=pull_repo.service
 
 [Service]
 Type=oneshot

@@ -6,7 +6,7 @@ ConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg
 ConditionPathExists=/bitcoind/templates/haproxy.jinja2
 Requires=docker.service
 After=docker.service
-After=clone_repo.service
+After=pull_repo.service
 
 [Service]
 Type=oneshot

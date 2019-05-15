@@ -10,6 +10,7 @@ After=docker.service
 After=mongodb.service
 After=bitcoin_core.service
 After=create_docker_network.service
+After=pull_repo.service
 
 [Service]
 TimeoutStartSec=0

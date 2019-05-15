@@ -11,13 +11,13 @@ After=bitcoin_core.service
 After=create_docker_network.service
 #After=bitcore.service
 #After=bitcore_insight.service
+After=pull_repo.service
 
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
 
 ExecStartPre=-/usr/bin/docker stop haproxy
-ExecStartPre=-/usr/bin/docker rm haproxy
 ExecStartPre=-/usr/bin/docker pull haproxy:alpine
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
@@ -25,7 +25,6 @@ ExecStart=/usr/bin/docker run \
   -p 8332:8332 \
   -p 8333:8333 \
   -p 80:80 \
-  -p 443:443 \
   -p 443:443 \
   -p 1024:1024 \
   -p 3000:3000 \
