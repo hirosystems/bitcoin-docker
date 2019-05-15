@@ -24,8 +24,9 @@ template_dest = "haproxy.cfg." + str(epoch)
 haproxy_cfg = "haproxy.cfg"
 print("Haproxy config: %s" % (haproxy_cfg))
 print("Haproxy temp config: %s" % (template_dest))
-container_name = "bitcoin_haproxy"
+container_name = "haproxy"
 return_code = 0
+
 
 def get_sha512(file):
     with open(file, "rb") as f:

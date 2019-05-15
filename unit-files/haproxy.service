@@ -1,18 +1,24 @@
 # haproxy.service
 [Unit]
 Description=HAproxy service for btc
-After=docker.service
 Requires=docker.service
-After=create_docker_network.service
+Requires=bitcoin_core.service
+#Requires=bitcore.service
+#Requires=bitcore_insight.service
 Requires=create_docker_network.service
+After=docker.service
+After=bitcoin_core.service
+After=create_docker_network.service
+#After=bitcore.service
+#After=bitcore_insight.service
 
 [Service]
 TimeoutStartSec=0
 Restart=on-failure
 
-ExecStartPre=-/usr/bin/docker stop bitcoin_haproxy
-ExecStartPre=-/usr/bin/docker rm bitcoin_haproxy
-ExecStartPre=/usr/bin/docker pull haproxy:alpine
+ExecStartPre=-/usr/bin/docker stop haproxy
+ExecStartPre=-/usr/bin/docker rm haproxy
+ExecStartPre=-/usr/bin/docker pull haproxy:alpine
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   -m 128m \
@@ -30,9 +36,13 @@ ExecStart=/usr/bin/docker run \
   --expose=8332 \
   --expose=8333 \
   -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \
-  --name bitcoin_haproxy \
+  --name haproxy \
   haproxy:alpine \
 /usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -L ${HOSTNAME}
+
+ExecStop=-/usr/bin/docker stop haproxy
+ExecStopPost=-/usr/bin/docker rm -f haproxy
+ExecReload=-/usr/bin/docker restart haproxy
 
 [Install]
 WantedBy=multi-user.target

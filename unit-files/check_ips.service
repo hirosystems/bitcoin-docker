@@ -1,14 +1,20 @@
-# check_ips.service
+# bitcoind check_ips.service
+#   for bitcore node: change env var `-e ROLE=bitcoind` -> `-e ROLE=bitcore `
 [Unit]
 Description=Check IPs for haproxy Service
 ConditionPathExists=/bitcoind/configs/haproxy/haproxy.cfg
 ConditionPathExists=/bitcoind/templates/haproxy.jinja2
+Requires=docker.service
+After=docker.service
+After=clone_repo.service
 
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/environment
-ExecStart=/usr/bin/docker container prune -f --filter "until=4h"
-ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:python.gcp
+ExecStartPre=-/usr/bin/docker container prune -f --filter "until=4h"
+ExecStartPre=-/usr/bin/docker pull quay.io/blockstack/bitcoind:python.gcp
+ExecStartPre=-/usr/bin/git -C /bitcoind pull
+
 ExecStart=/usr/bin/docker run -d \
   -e PROJECT=ops-shared \
   -e ROLE=bitcoind \

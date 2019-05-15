@@ -1,12 +1,17 @@
-# bitcore-insight.service
+# bitcore_insight.service
 [Unit]
 Description=Bitcore Insight service
-After=docker.service
-After=bitcore.service
 Requires=docker.service
 Requires=bitcore.service
-After=create_docker_network.service
+Requires=bitcoin_core.service
 Requires=create_docker_network.service
+Requires=mongodb.service
+Before=haproxy.service
+After=docker.service
+After=bitcore.service
+After=bitcoin_core.service
+After=create_docker_network.service
+After=mongodb.service
 
 [Service]
 TimeoutStartSec=0
@@ -17,9 +22,9 @@ ProtectSystem=full
 NoNewPrivileges=true
 PrivateDevices=true
 
-ExecStartPre=-/usr/bin/docker stop bitcore-insight
-ExecStartPre=-/usr/bin/docker rm bitcore-insight
-ExecStop=-/usr/bin/docker stop bitcore-insight
+ExecStartPre=-/usr/bin/docker stop bitcore_insight
+ExecStartPre=-/usr/bin/docker rm bitcore_insight
+ExecStop=-/usr/bin/docker stop bitcore_insight
 
 ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
 ExecStart=/usr/bin/docker run \
@@ -32,9 +37,13 @@ ExecStart=/usr/bin/docker run \
   -e API_PREFIX=http://bitcore.bitcoind:3000/api \
   -v /bitcoind/configs/bitcoin/proxy.conf.override.js:/bitcore/packages/insight/proxy.conf.override.js \
   -w /bitcore/packages/insight \
-  --name bitcore-insight \
+  --name bitcore_insight \
   quay.io/blockstack/bitcoind:bitcore \
 sh -c "./node_modules/.bin/ng serve --port 4200 --host 0.0.0.0"
+
+ExecStop=-/usr/bin/docker stop bitcore_insight
+ExecStopPost=-/usr/bin/docker rm -f bitcore_insight
+ExecReload=-/usr/bin/docker restart bitcore_insight
 
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true

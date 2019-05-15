@@ -1,11 +1,12 @@
 # create_docker_network.service
 [Unit]
 Description=BTC Docker Network
-After=docker.service
-Requires=docker.service
-Before=btc.service
-Before=haproxy.service
 ConditionFileIsExecutable=/bitcoind/scripts/create_docker_network.sh
+Requires=docker.service
+Before=bitcoin_core.service
+Before=haproxy.service
+After=docker.service
+
 
 [Service]
 TimeoutStartSec=0

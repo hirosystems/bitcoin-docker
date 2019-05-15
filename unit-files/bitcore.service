@@ -1,14 +1,15 @@
 # bitcore.service
 [Unit]
 Description=Bitcore service
-After=docker.service
-After=mongodb.service
-After=btc.service
 Requires=docker.service
 Requires=mongodb.service
-Requires=btc.service
-After=create_docker_network.service
+Requires=bitcoin_core.service
 Requires=create_docker_network.service
+Before=haproxy.service
+After=docker.service
+After=mongodb.service
+After=bitcoin_core.service
+After=create_docker_network.service
 
 [Service]
 TimeoutStartSec=0
@@ -37,9 +38,9 @@ ExecStart=/usr/bin/docker run \
   quay.io/blockstack/bitcoind:bitcore \
 sh -c "npm run tsc && node build/src/server.js"
 
-ExecStop=/bin/docker stop bitcore
-ExecStopPost=/bin/docker rm -f bitcore
-ExecReload=/bin/docker restart bitcore
+ExecStop=-/usr/bin/docker stop bitcore
+ExecStopPost=-/usr/bin/docker rm -f bitcore
+ExecReload=-/usr/bin/docker restart bitcore
 
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true

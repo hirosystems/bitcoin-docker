@@ -2,9 +2,11 @@
 [Unit]
 Description=Mongodb service
 After=docker.service
-Requires=docker.service
 After=create_docker_network.service
+Requires=docker.service
 Requires=create_docker_network.service
+Before=bitcore.service
+Before=bitcore_insight.service
 
 [Service]
 TimeoutStartSec=0
@@ -12,18 +14,18 @@ Restart=on-failure
 ExecStartPre=-/usr/bin/docker stop mongodb
 ExecStartPre=-/usr/bin/docker rm mongodb
 
-ExecStartPre=/usr/bin/docker pull mongo:3.4-jessie
+ExecStartPre=-/usr/bin/docker pull mongo:3.4-jessie
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   --expose 27017 \
-  -p "27017:27017 \
+  -p 27017:27017 \
   -v /data/mongodb:/data/db \
   --name mongodb \
 mongo:3.4-jessie
 
-ExecStop=/bin/docker stop mongodb
-ExecStopPost=/bin/docker rm -f mongodb
-ExecReload=/bin/docker restart mongodb
+ExecStop=-/usr/bin/docker stop mongodb
+ExecStopPost=-/usr/bin/docker rm -f mongodb
+ExecReload=-/usr/bin/docker restart mongodb
 
 [Install]
 WantedBy=multi-user.target
