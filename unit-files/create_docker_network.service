@@ -3,6 +3,7 @@
 Description=BTC Docker Network
 ConditionFileIsExecutable=/bitcoind/scripts/create_docker_network.sh
 Requires=docker.service
+Requires=clone_repo.service
 Before=bitcoin_core.service
 Before=haproxy.service
 After=docker.service

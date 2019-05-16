@@ -1,19 +1,15 @@
 # bitcore.service
 [Unit]
 Description=Bitcore service
+After=docker.service
 Requires=docker.service
 Requires=mongodb.service
-Requires=bitcoin_core.service
-Requires=create_docker_network.service
-Before=haproxy.service
-After=docker.service
 After=create_docker_network.service
+Requires=create_docker_network.service
 
 [Service]
 TimeoutStartSec=0
-Restart=always
-RemainAfterExit=yes
-RestartSec=5
+Restart=on-failure
 RuntimeDirectory=bitcoind
 PrivateTmp=true
 ProtectSystem=full
@@ -22,10 +18,9 @@ PrivateDevices=true
 
 ExecStartPre=-/usr/bin/docker stop bitcore
 ExecStartPre=-/usr/bin/docker rm bitcore
-ExecStartPre=/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
+ExecStartPre=-/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
-  --memory=512m \
   -p 38100:8100 \
   -p 33000:3000 \
   --expose 38100 \
