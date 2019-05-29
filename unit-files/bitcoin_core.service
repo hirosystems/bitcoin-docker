@@ -8,7 +8,7 @@ After=docker.service
 After=create_docker_network.service
 
 [Service]
-TimeoutStartSec=5
+TimeoutStartSec=120
 Restart=always
 RemainAfterExit=yes
 RestartSec=5
@@ -22,9 +22,9 @@ ExecStartPre=-/usr/bin/docker stop bitcoin_core
 ExecStartPre=-/bin/sleep 1
 ExecStartPre=-/usr/bin/docker pull quay.io/blockstack/bitcoind:alpine
 ExecStart=/usr/bin/docker run \
-  --restart=always \
   --net=bitcoind \
-  --memory=2048m \
+  --ulimit nofile=90000:90000 \
+  --memory=1024m \
   -p 38332:8332 \
   -p 38333:8333 \
   -p 58333:28332 \

@@ -3,9 +3,8 @@
 Description=HAproxy service for btc
 Requires=docker.service
 Requires=create_docker_network.service
-After=docker.service
+After=bitcore.service
 After=create_docker_network.service
-
 
 [Service]
 TimeoutStartSec=0
@@ -16,7 +15,9 @@ ExecStartPre=-/usr/bin/docker stop haproxy
 ExecStartPre=-/usr/bin/docker pull haproxy:alpine
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
+  --ulimit nofile=90000:90000 \
   -m 128m \
+  --oom-kill-disable \
   -p 8332:8332 \
   -p 8333:8333 \
   -p 80:80 \

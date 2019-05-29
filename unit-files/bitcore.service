@@ -21,6 +21,9 @@ ExecStartPre=-/usr/bin/docker rm bitcore
 ExecStartPre=-/usr/bin/docker pull quay.io/blockstack/bitcoind:bitcore
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
+  --ulimit nofile=90000:90000 \
+  --memory=2048m \
+  --oom-kill-disable \
   -p 38100:8100 \
   -p 33000:3000 \
   --expose 38100 \

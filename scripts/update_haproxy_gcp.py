@@ -12,7 +12,8 @@ from shutil import copyfile, copymode
 
 
 zones = []
-ips = {}
+public_ips = {}
+local_ips = {}
 client = docker.APIClient(base_url='unix://var/run/docker.sock')
 epoch = time.time()
 bitcore_check = client.containers(filters={'name': 'bitcore'})
@@ -65,10 +66,13 @@ def list_zones(compute, project):
     return zones
 
 
-def write_template(template_path, template_source, template_dest, template_values):
+def write_template(template_path, template_source, template_dest, public_hosts, local_hosts):
     jinja2_env = jinja2.Environment(loader=jinja2.FileSystemLoader([template_path]), trim_blocks=True)
     template = jinja2_env.get_template(template_source)
-    result = template.render(hosts=template_values)
+    result = template.render(
+        public_hosts=public_hosts,
+        local_hosts=local_hosts
+    )
     with os.fdopen(os.open(template_dest, os.O_WRONLY | os.O_EXCL | os.O_CREAT, 0o644), 'w') as handle:
         handle.write(result)
         handle.close()
@@ -88,11 +92,10 @@ def main(project, role):
         if instances:
             print('Retrieving ips in project %s ( %s )' % (project, zone))
             for instance in instances:
-                # forced to use public ip's here...
                 if 'natIP' in instance['networkInterfaces'][0]['accessConfigs'][0]:
-                    ips[instance['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                # if 'networkIP' in instance['networkInterfaces'][0]:
-                #     ips[instance['name']] = instance['networkInterfaces'][0]['networkIP']
+                    public_ips[instance['name']] = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                if 'networkIP' in instance['networkInterfaces'][0]:
+                    local_ips[instance['name']] = instance['networkInterfaces'][0]['networkIP']
 
 
 if __name__ == '__main__':
@@ -121,6 +124,7 @@ if __name__ == '__main__':
     new_config = local_path + "/configs/haproxy/" + template_dest
     print("local_path: %s" % (local_path))
     print("template_path: %s" % (template_path))
+    print("template_source: %s" % (template_source))
     print("saved_config: %s" % (saved_config))
     print("new_config: %s" % (new_config))
     print("current_config: %s" % (config))
@@ -128,10 +132,12 @@ if __name__ == '__main__':
         print("%s is missing" % (config))
         exit(1)
     main(args.project_id, args.role)
-    if len(ips) > 0:
-        hosts = collections.OrderedDict(sorted(ips.items()))
-        print(hosts)
-        write_template(template_path, template_source, new_config, hosts)
+    if len(public_ips) > 0 and len(local_ips) > 0:
+        public_hosts = collections.OrderedDict(sorted(public_ips.items()))
+        local_hosts = collections.OrderedDict(sorted(local_ips.items()))
+        print("Public IPs: %s" % (public_hosts))
+        print("Local IPs: %s" % (local_hosts))
+        write_template(template_path, template_source, new_config, public_hosts, local_hosts)
         if not os.path.isfile(new_config):
             print("File %s is missing" % (new_config))
             exit(1)
