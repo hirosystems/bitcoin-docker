@@ -129,8 +129,8 @@ if __name__ == '__main__':
     print("new_config: %s" % (new_config))
     print("current_config: %s" % (config))
     if not os.path.isfile(config):
-        print("%s is missing" % (config))
-        exit(1)
+        print("%s is missing - creating it" % (config))
+        open(config, 'a').close()
     main(args.project_id, args.role)
     if len(public_ips) > 0 and len(local_ips) > 0:
         public_hosts = collections.OrderedDict(sorted(public_ips.items()))
