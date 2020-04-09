@@ -1,3 +1,4 @@
 /notes.txt
 /instance.json
 /configs/haproxy/haproxy.cfg
+/scripts/test_mongo.py

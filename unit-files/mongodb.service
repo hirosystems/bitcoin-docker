@@ -9,17 +9,19 @@ Before=bitcore.service
 Before=bitcore_insight.service
 
 [Service]
+RuntimeMaxSec=14400
 TimeoutStartSec=0
 Restart=always
 RemainAfterExit=yes
-RestartSec=5ExecStartPre=-/usr/bin/docker stop mongodb
+RestartSec=5
+ExecStartPre=-/usr/bin/docker stop mongodb
 ExecStartPre=-/usr/bin/docker rm mongodb
 
 ExecStartPre=-/usr/bin/docker pull mongo:3.4-jessie
 ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   --ulimit nofile=90000:90000 \
-  --memory=5120m \
+  --memory=7680m \
   --oom-kill-disable \
   --expose 27017 \
   -p 27017:27017 \
