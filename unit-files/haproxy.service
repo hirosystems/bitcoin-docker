@@ -20,6 +20,8 @@ ExecStart=/usr/bin/docker run \
   --oom-kill-disable \
   -p 8332:8332 \
   -p 8333:8333 \
+  -p 18332:18332 \
+  -p 18333:18333 \
   -p 80:80 \
   -p 443:443 \
   -p 1024:1024 \
@@ -30,6 +32,8 @@ ExecStart=/usr/bin/docker run \
   --expose=3000 \
   --expose=8332 \
   --expose=8333 \
+  --expose=18332 \
+  --expose=18333 \
   -v /bitcoind/configs/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg \
   --name haproxy \
   haproxy:alpine \

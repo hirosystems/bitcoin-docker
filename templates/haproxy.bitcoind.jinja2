@@ -26,7 +26,7 @@ resolvers docker_resolver
 #  peer {{ key|e }} {{ value|e }}:1024
 #  {% endfor %}
 
-frontend bitcoind_rpc
+frontend bitcoin-core_rpc
   mode tcp
   option tcplog
   log global
@@ -39,9 +39,9 @@ frontend bitcoind_rpc
 # Rules
   tcp-request connection track-sc0 src table Abuse
   tcp-request connection reject if abuse_cnt
-  default_backend bitcoind_rpc
+  default_backend bitcoin-core_rpc
 
-frontend bitcoind_p2p
+frontend bitcoin-core_p2p
   mode tcp
   option tcplog
   log global
@@ -54,9 +54,9 @@ frontend bitcoind_p2p
 # Rules
   tcp-request connection track-sc0 src table Abuse
   tcp-request connection reject if abuse_cnt
-  default_backend bitcoind_p2p
+  default_backend bitcoin-core_p2p
 
-backend bitcoind_rpc
+backend bitcoin-core_rpc
   mode tcp
   log global
   balance leastconn
@@ -65,7 +65,7 @@ backend bitcoind_rpc
   server {{ key|e }} {{ value|e }}:38332 maxconn 100 check port 38332 check inter 10s
   {% endfor %}
 
-backend bitcoind_p2p
+backend bitcoin-core_p2p
   mode tcp
   log global
   balance leastconn
@@ -73,6 +73,56 @@ backend bitcoind_p2p
   {% for key, value in public_hosts.items() -%}
   server {{ key|e }} {{ value|e }}:38333 maxconn 100 check port 38333 check inter 10s
   {% endfor %}
+
+
+frontend bitcoin-testnet_rpc
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:18332
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 25
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcoin-testnet_rpc
+
+frontend bitcoin-testnet_p2p
+  mode tcp
+  option tcplog
+  log global
+  maxconn 4096
+  bind *:18333
+# ACL function declarations
+  acl is_abuse src_http_req_rate(Abuse) ge 10
+  acl inc_abuse_cnt src_inc_gpc0(Abuse) gt 0
+  acl abuse_cnt src_get_gpc0(Abuse) gt 0
+# Rules
+  tcp-request connection track-sc0 src table Abuse
+  tcp-request connection reject if abuse_cnt
+  default_backend bitcoin-testnet_p2p
+
+backend bitcoin-testnet_rpc
+  mode tcp
+  log global
+  balance leastconn
+  server bitcoin_testnet bitcoin_testnet.bitcoind:18332 maxconn 100 check port 18332 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in public_hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:48332 maxconn 100 check port 48332 check inter 10s
+  {% endfor %}
+
+backend bitcoin-testnet_p2p
+  mode tcp
+  log global
+  balance leastconn
+  server bitcoin_testnet bitcoin_testnet.bitcoind:18333 maxconn 100 check port 18333 check inter 10s resolvers docker_resolver resolve-prefer ipv4
+  {% for key, value in public_hosts.items() -%}
+  server {{ key|e }} {{ value|e }}:48333 maxconn 100 check port 48333 check inter 10s
+  {% endfor %}
+
 
 backend Abuse
 # keep 100k entries, expiring 30m
