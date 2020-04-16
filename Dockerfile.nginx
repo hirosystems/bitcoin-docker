@@ -1,0 +1,11 @@
+ENV NGINX_CONF_DIR  /etc/nginx/conf.d/
+
+
+COPY metrics.conf ${NGINX_CONF_DIR}
+COPY lua.conf ${NGINX_CONF_DIR}
+COPY crontab /var/spool/cron/crontabs/root
+COPY check_bucket_file /usr/local/bin/check_bucket_file
+RUN chmod a+x /usr/local/bin/check_bucket_file
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["sh", "-c", "/usr/sbin/crond -L /dev/null  && /usr/local/openresty/bin/openresty"]

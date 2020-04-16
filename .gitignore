@@ -1,7 +1,9 @@
 /notes.txt
 /instance.json
 /configs/haproxy/haproxy.cfg
+/configs/bitcoin/neon-master-node.toml
 /scripts/test_mongo.py
 /scripts/local_update_haproxy_gcp.py
 /packer/bitcoind-gcp-raid-stage2.ign
 /packer/bitcoind-gcp-raid.ign
+/build-neon.sh

@@ -1,0 +1,49 @@
+# bitcoin_regtest.service
+[Unit]
+Description=BTC Regtest service
+Requires=docker.service
+Requires=create_docker_network.service
+Before=btc_firewall.service
+After=docker.service
+After=create_docker_network.service
+
+[Service]
+TimeoutStartSec=5
+Restart=always
+RemainAfterExit=yes
+RestartSec=5
+RuntimeDirectory=bitcoind
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+PrivateDevices=true
+
+ExecStartPre=-/usr/bin/docker stop bitcoin_regtest
+ExecStartPre=-/bin/sleep 1
+ExecStartPre=-/usr/bin/docker pull quay.io/blockstack/bitcoind:alpine
+ExecStart=/usr/bin/docker run \
+  --restart=always \
+  --net=bitcoind \
+  --ulimit nofile=90000:90000 \
+  -p 18443:28443 \
+  -p 28332:28332 \
+  --expose 28443 \
+  --expose 28332 \
+  -e BTC_CONF=/etc/bitcoin/bitcoin.conf \
+  -e BTC_DATA=/root/.bitcoin \
+  -e BTC_PID=/run/bitcoind.pid \
+  -v /bitcoind/configs/bitcoin/bitcoin-regtest.conf:/etc/bitcoin/bitcoin.conf \
+  -v /data/bitcoin:/root/.bitcoin \
+  --name bitcoin_regtest \
+  quay.io/blockstack/bitcoind:alpine \
+/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin
+
+ExecStop=-/usr/bin/docker stop bitcoin_regtest
+ExecStopPost=-/usr/bin/docker rm -f bitcoin_regtest
+ExecReload=-/usr/bin/docker restart bitcoin_regtest
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target
