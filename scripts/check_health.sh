@@ -76,14 +76,14 @@ function get_counter_file() {
 
 # Get blockchain heights. Iterate the counter file if the heights don't match. Otherwise, reset the counter to 0
 function compare_heights() {
-    BITCOIN_CORE_HEIGHT=$(docker logs ${BITCOIN_CORE_CONTAINER} --tail 100 | grep "height=" | cut -d '=' -f3 | awk '{print $1}' | tail -1)
-    BITCORE_HEIGHT=$(docker logs ${BITCORE_CONTAINER} --tail 100 | grep "height=" | cut -d '=' -f4 | tail -1)
+    local bitcoin_core_height=$(docker logs ${BITCOIN_CORE_CONTAINER} --tail 100 | grep "height=" | cut -d '=' -f3 | awk '{print $1}' | tail -1)
+    local bitcore_height=$(docker logs ${BITCORE_CONTAINER} --tail 100 | grep "height=" | cut -d '=' -f4 | tail -1)
 
     # Compare blockchain heights
-    if [ "${BITCOIN_CORE_HEIGHT}" != "${BITCORE_HEIGHT}" ]; then
+    if [ "${bitcoin_core_height}" != "${bitcore_height}" ]; then
         # Increment counter file by 1
         echo $(awk '{printf($1+1)}' ${TEMP_COUNTER_FILE}) > ${TEMP_COUNTER_FILE}
-    elif [ "${BITCOIN_CORE_HEIGHT}" = "${BITCORE_HEIGHT}" ]; then
+    elif [ "${bitcoin_core_height}" = "${bitcore_height}" ]; then
         # Reset counter file to 0
         echo "0" > ${TEMP_COUNTER_FILE}
     fi

@@ -1,8 +1,10 @@
-# bitcore.timer
+# check_health.timer
 [Unit]
-Description=Wait 5 min to start bitcore on boot
+Description=Checks Bitcore performance health every minute
 
 [Timer]
-OnBootSec=5min
+OnCalendar=*-*-* *:**:00
+Persistent=true
+
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target

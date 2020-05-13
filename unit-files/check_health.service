@@ -1,12 +1,13 @@
-# health_checker.service
+# check_health.service
 [Unit]
-Description=Health Check Service
+Description=Check Health Service
 Requires=docker.service
 Requires=bitcore.service
 Requires=bitcoin_core.service
 Requires=create_docker_network.service
 
 [Service]
+Type=oneshot
 TimeoutStartSec=0
 Restart=on-failure
 RuntimeDirectory=bitcoind
@@ -16,7 +17,7 @@ NoNewPrivileges=true
 PrivateDevices=true
 
 ExecStartPre=-/usr/bin/rm -f /tmp/health-check*
-ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh
+ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 10
 
 # Deny the creation of writable and executable memory mappings.
 MemoryDenyWriteExecute=true
