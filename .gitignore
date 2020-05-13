@@ -7,3 +7,4 @@
 /packer/bitcoind-gcp-raid-stage2.ign
 /packer/bitcoind-gcp-raid.ign
 /build-neon.sh
+.idea

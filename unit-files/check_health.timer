@@ -1,0 +1,8 @@
+# bitcore.timer
+[Unit]
+Description=Wait 5 min to start bitcore on boot
+
+[Timer]
+OnBootSec=5min
+[Install]
+WantedBy=multi-user.target
