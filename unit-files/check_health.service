@@ -8,7 +8,6 @@ Requires=create_docker_network.service
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 
 ExecStartPre=-/usr/bin/rm -f /tmp/health-check*
 ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 10
