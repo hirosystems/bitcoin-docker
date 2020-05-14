@@ -9,8 +9,7 @@ Requires=create_docker_network.service
 [Service]
 Type=oneshot
 
-ExecStartPre=-/usr/bin/rm -f /tmp/health-check*
-ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 10
+ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 5
 
 [Install]
 WantedBy=multi-user.target

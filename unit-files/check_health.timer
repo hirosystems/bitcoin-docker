@@ -1,9 +1,9 @@
 # check_health.timer
 [Unit]
-Description=Checks Bitcore performance health every minute
+Description=Checks Bitcore performance health every 10 minutes
 
 [Timer]
-OnCalendar=minutely
+OnCalendar=*:0/5
 Persistent=true
 
 [Install]
