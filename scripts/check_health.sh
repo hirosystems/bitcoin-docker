@@ -96,7 +96,7 @@ function compare_heights() {
         if [ ${blocks_behind_on_this_run} -gt ${blocks_behind_on_previous_run} ]; then
             sed -ri "s/([[:digit:]]),([[:digit:]])/\1,${blocks_behind_on_this_run}/g" ${TEMP_COUNTER_FILE}
 
-            # Restart Bitcore docker container if where past the failure threshold
+            # Restart Bitcore docker container if we're past the failure threshold
             if [ $(cat ${TEMP_COUNTER_FILE}) -ge ${RESTART_THRESHOLD} ]; then
                 log_info "Threshold met and we're falling further behind in blocks than previous execution. Restarting Bitcore Docker container..."
                 docker restart ${BITCORE_CONTAINER}
