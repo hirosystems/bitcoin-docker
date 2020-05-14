@@ -36,7 +36,7 @@ function set_vars() {
     BITCORE_CONTAINER=${BITCORE_CONTAINER:-bitcore}
     BITCOIN_CORE_CONTAINER=${BITCOIN_CORE_CONTAINER:-bitcoin_core}
     TEMP_COUNTER_FILE_BASE_NAME="bitcore-health-check"
-    TEMP_COUNTER_FILE=$(ls /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.*)
+    TEMP_COUNTER_FILE=$(ls /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.* 2>/dev/null || echo '')
 }
 
 function log_info() {
@@ -52,7 +52,7 @@ function log_error() {
 }
 
 # Create counter file for tracking the number of times bitcore has been observed as behind the bitcoin blockchain
-fuction create_counter_file() {
+function create_counter_file() {
     TEMP_COUNTER_FILE=$(mktemp /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.XXXXX)
     echo "0" > ${TEMP_COUNTER_FILE}
 }
@@ -82,9 +82,11 @@ function compare_heights() {
     # Compare blockchain heights
     if [ "${bitcoin_core_height}" != "${bitcore_height}" ]; then
         # Increment counter file by 1
+        log_info "Height discrepancy found. Incrementing counter file."
         echo $(awk '{printf($1+1)}' ${TEMP_COUNTER_FILE}) > ${TEMP_COUNTER_FILE}
     elif [ "${bitcoin_core_height}" = "${bitcore_height}" ]; then
         # Reset counter file to 0
+        log_info "Heights match. Resetting counter file to 0"
         echo "0" > ${TEMP_COUNTER_FILE}
     fi
 
