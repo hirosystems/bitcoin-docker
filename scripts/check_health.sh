@@ -86,7 +86,7 @@ function compare_heights() {
         echo $(awk '{printf($1+1)}' ${TEMP_COUNTER_FILE}) > ${TEMP_COUNTER_FILE}
     elif [ "${bitcoin_core_height}" = "${bitcore_height}" ]; then
         # Reset counter file to 0
-        log_info "Heights match. Resetting counter file to 0"
+        log_info "Heights match. Setting counter file to 0"
         echo "0" > ${TEMP_COUNTER_FILE}
     fi
 
