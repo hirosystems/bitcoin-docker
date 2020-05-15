@@ -37,6 +37,8 @@ function set_vars() {
     BITCOIN_CORE_CONTAINER=${BITCOIN_CORE_CONTAINER:-bitcoin_core}
     TEMP_COUNTER_FILE_BASE_NAME="bitcore-health-check"
     TEMP_COUNTER_FILE=$(ls /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.* 2>/dev/null || echo '')
+    SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-} # Passed in from unit's .env file
+    INSTANCE_NAME=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name)
 }
 
 function log_info() {
@@ -49,6 +51,41 @@ function log_warning() {
 
 function log_error() {
     echo "$(date -u +%FT%T.%3NZ) | ERROR: ${1}"
+}
+
+function post_to_slack_error() {
+    local blocks_behind=${1}
+
+    if [[ "${SLACK_WEBHOOK_URL}" =~ https:\/\/hooks.slack.com/services\/* ]]; then
+        echo -e "ERROR\n${1}"
+        curl -X POST -H 'Content-type: application/json' --data "
+{
+        'blocks': [
+                {
+                        'type': 'section',
+                        'text': {
+                                'type': 'mrkdwn',
+                                'text': '*BitCore Container Restarted*'
+                        }
+                },
+                {
+                        'type': 'section',
+                        'fields': [
+                                {
+                                        'type': 'mrkdwn',
+                                        'text': '*VM:*\n${INSTANCE_NAME}'
+                                },
+                                {
+                                        'type': 'mrkdwn',
+                                        'text': '*# of Blocks Behind:*\n${blocks_behind}'
+                                }
+                        ]
+                }
+        ]
+}" ${SLACK_WEBHOOK_URL}
+    else
+        log_warning "Failed to post message to Slack. Slack webhook URL is '${SLACK_WEBHOOK_URL}'"
+    fi
 }
 
 # Create counter file for tracking the number of times bitcore has been observed as behind the bitcoin blockchain
@@ -100,6 +137,7 @@ function compare_heights() {
             if [ $(cat ${TEMP_COUNTER_FILE}) -ge ${RESTART_THRESHOLD} ]; then
                 log_info "Threshold met and we're falling further behind in blocks than previous execution. Restarting Bitcore Docker container..."
                 docker restart ${BITCORE_CONTAINER}
+                post_to_slack_error ${blocks_behind_on_this_run}
             fi
         fi
     elif [ "${bitcoin_core_height}" = "${bitcore_height}" ]; then
