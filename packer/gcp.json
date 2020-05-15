@@ -1,11 +1,11 @@
 {
   "variables": {
-    "version": "1552335521",
+    "version": "1589575783",
     "project_id": "ops-shared",
     "zone": "us-east4-a",
     "user_data_file": "bitcoind-gcp.ign",
-    "image_description": "bitcoin_docker",
-    "name_prefix": "bitcoin_docker",
+    "image_description": "dockerized bitcoin",
+    "name_prefix": "bitcoin-docker",
     "root_volume_size": "500",
     "network_project_id": "blockstack-terraform-admin",
     "network": "blockstack-shared",
@@ -17,11 +17,14 @@
       "type": "googlecompute",
       "account_file": "",
       "project_id": "{{user `project_id`}}",
-      "source_image_family": "coreos-stable",
+      "source_image_family": "fedora-coreos-stable",
+      "source_image_project_id": "fedora-coreos-cloud",
       "disk_size": "{{user `root_volume_size`}}",
       "machine_type": "n1-standard-1",
+      "preemptible": true,
       "zone": "{{user `zone`}}",
       "disk_type": "pd-ssd",
+      "image_name": "{{user `name_prefix`}}-{{user `version`}}",
       "image_description": "{{user `image_description`}} {{user `version`}}",
       "ssh_username": "core",
       "communicator": "ssh",
@@ -36,12 +39,12 @@
         "{{user `firewall`}}"
       ],
       "image_labels" : {
-        "OS": "CoreOS Stable",
-        "Name": "{{user `name_prefix`}}_{{user `version`}}",
-        "BuildType": "SSD",
-        "BuildMethod": "Packer",
-        "BuildTime": "{{timestamp}}",
-        "Version": "{{user `version`}}"
+        "os": "fedora_coreos_stable",
+        "name": "{{user `name_prefix`}}_{{user `version`}}",
+        "buildtype": "ssd",
+        "buildmethod": "packer",
+        "buildtime": "{{timestamp}}",
+        "version": "{{user `version`}}"
       }
     }
   ],
