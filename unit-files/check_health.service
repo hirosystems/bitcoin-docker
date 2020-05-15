@@ -1,0 +1,15 @@
+# check_health.service
+[Unit]
+Description=Check Health Service
+Requires=docker.service
+Requires=bitcore.service
+Requires=bitcoin_core.service
+Requires=create_docker_network.service
+
+[Service]
+Type=oneshot
+
+ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 5
+
+[Install]
+WantedBy=multi-user.target

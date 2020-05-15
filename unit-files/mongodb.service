@@ -34,4 +34,4 @@ ExecStopPost=-/usr/bin/docker rm -f mongodb
 ExecReload=-/usr/bin/docker restart mongodb
 
 [Install]
-WantedBy=multi-user.target
+RequiredBy=bitcore.service
