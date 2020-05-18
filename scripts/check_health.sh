@@ -57,7 +57,7 @@ function post_to_slack_error() {
     local blocks_behind=${1}
 
     if [[ "${SLACK_WEBHOOK_URL}" =~ https:\/\/hooks.slack.com/services\/* ]]; then
-        curl -X POST -H 'Content-type: application/json' --data "
+        curl -s -X POST -H 'Content-type: application/json' --data "
 {
         'blocks': [
                 {
@@ -120,6 +120,7 @@ function compare_heights() {
     local times_failed=$(cat ${TEMP_COUNTER_FILE} | tail -n 1 | cut -d',' -f1)
     local blocks_behind_on_previous_run=$(cat ${TEMP_COUNTER_FILE} | tail -n 1 | cut -d',' -f2)
 
+    # Calculate delta of blocks behind last run and blocks behind on this run
     if [ -n "${bitcoin_core_height}" ] && [ -n "${bitcore_height}" ]; then
         local blocks_behind_on_this_run=$((bitcoin_core_height - bitcore_height))
     else
