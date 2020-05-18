@@ -119,7 +119,14 @@ function compare_heights() {
     local bitcore_height=$(docker logs ${BITCORE_CONTAINER} --tail 100 | grep "height=" | cut -d '=' -f4 | tail -1)
     local times_failed=$(cat ${TEMP_COUNTER_FILE} | tail -n 1 | cut -d',' -f1)
     local blocks_behind_on_previous_run=$(cat ${TEMP_COUNTER_FILE} | tail -n 1 | cut -d',' -f2)
-    local blocks_behind_on_this_run=$((${bitcoin_core_height} - ${bitcore_height}))
+
+    if [ -n "${bitcoin_core_height}" ] && [ -n "${bitcore_height}" ]; then
+        local blocks_behind_on_this_run=$((bitcoin_core_height - bitcore_height))
+    else
+        log_error "bitcoin_core height and/or bitcore height is empty. One of the containers may still be booting."
+        log_error "Exiting..."
+        exit 1
+    fi
 
     # Compare blockchain heights
     if [ "${bitcoin_core_height}" != "${bitcore_height}" ]; then
