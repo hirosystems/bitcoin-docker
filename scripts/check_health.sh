@@ -38,7 +38,7 @@ function set_vars() {
     TEMP_COUNTER_FILE_BASE_NAME="bitcore-health-check"
     TEMP_COUNTER_FILE=$(ls /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.* 2>/dev/null || echo '')
     SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-} # Passed in from unit's .env file
-    INSTANCE_NAME=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name)
+    INSTANCE_NAME=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name)
 }
 
 function log_info() {
@@ -57,7 +57,6 @@ function post_to_slack_error() {
     local blocks_behind=${1}
 
     if [[ "${SLACK_WEBHOOK_URL}" =~ https:\/\/hooks.slack.com/services\/* ]]; then
-        echo -e "ERROR\n${1}"
         curl -X POST -H 'Content-type: application/json' --data "
 {
         'blocks': [
@@ -134,9 +133,9 @@ function compare_heights() {
             sed -ri "s/([[:digit:]]),([[:digit:]])/\1,${blocks_behind_on_this_run}/g" ${TEMP_COUNTER_FILE}
 
             # Restart Bitcore docker container if we're past the failure threshold
-            if [ $(cat ${TEMP_COUNTER_FILE}) -ge ${RESTART_THRESHOLD} ]; then
+            if [ ${times_failed} -ge ${RESTART_THRESHOLD} ]; then
                 log_info "Threshold met and we're falling further behind in blocks than previous execution. Restarting Bitcore Docker container..."
-                docker restart ${BITCORE_CONTAINER}
+                docker restart ${BITCORE_CONTAINER} >/dev/null
                 post_to_slack_error ${blocks_behind_on_this_run}
             fi
         fi
