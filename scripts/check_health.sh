@@ -37,7 +37,7 @@ function set_vars() {
     BITCOIN_CORE_CONTAINER=${BITCOIN_CORE_CONTAINER:-bitcoin_core}
     TEMP_COUNTER_FILE_BASE_NAME="bitcore-health-check"
     TEMP_COUNTER_FILE=$(ls /tmp/${TEMP_COUNTER_FILE_BASE_NAME}.* 2>/dev/null || echo '')
-    SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-} # Passed in from unit's .env file
+    SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-} # Passed in from unit's environment file
     INSTANCE_NAME=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name)
 }
 
