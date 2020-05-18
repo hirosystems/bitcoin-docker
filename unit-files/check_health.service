@@ -8,6 +8,7 @@ Requires=create_docker_network.service
 
 [Service]
 Type=oneshot
+EnvironmentFile=/etc/environment
 
 ExecStart=/usr/bin/bash /bitcoind/scripts/check_health.sh -t 5
 
