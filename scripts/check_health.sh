@@ -134,11 +134,11 @@ function compare_heights() {
         # Increment counter file by 1
         log_info "Height discrepancy found. Incrementing counter file."
         sed -ri "s/([[:digit:]]),([[:digit:]])/$((${times_failed} + 1)),\2/g" ${TEMP_COUNTER_FILE}
+        sed -ri "s/([[:digit:]]),([[:digit:]])/\1,${blocks_behind_on_this_run}/g" ${TEMP_COUNTER_FILE}
 
         # Compare current blocks behind against previous blocks behind
         # If the blocks are getting further behind bitcoin_core since the last execution, update the counter file
         if [ ${blocks_behind_on_this_run} -gt ${blocks_behind_on_previous_run} ]; then
-            sed -ri "s/([[:digit:]]),([[:digit:]])/\1,${blocks_behind_on_this_run}/g" ${TEMP_COUNTER_FILE}
 
             # Restart Bitcore docker container if we're past the failure threshold
             if [ ${times_failed} -ge ${RESTART_THRESHOLD} ]; then
