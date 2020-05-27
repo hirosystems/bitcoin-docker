@@ -22,7 +22,6 @@ ExecStart=/usr/bin/docker run \
   --net=bitcoind \
   --ulimit nofile=90000:90000 \
   --memory=7680m \
-  --oom-kill-disable \
   --expose 27017 \
   -p 27017:27017 \
   -v /data/mongodb:/data/db \
