@@ -105,7 +105,7 @@ make STATIC=1
 echo ""
 echo "Creating Binary dist"
 echo ""
-if [ WITH_MUSL -eq 0 ]; then
+if [ $WITH_MUSL -eq 0 ]; then
   BINARY_ARCHIVE="glibc-v${BTC_VERSION}${SUFFIX}"
 else
   BINARY_ARCHIVE="musl-v${BTC_VERSION}${SUFFIX}"
