@@ -36,7 +36,5 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           context: ${{ env.CONTEXT }}
           tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
-          path: ${{ env.CONTEXT }}
-          build_args: BTC_VERSION=${{ env.RELEASE_VERSION }}
-          add_git_labels: true
+          build-args: BTC_VERSION=${{ env.RELEASE_VERSION }}
           push: true
