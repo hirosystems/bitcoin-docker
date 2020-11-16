@@ -1,8 +1,8 @@
 name: bitcoin-alpine-multistage
 env:
   IMAGE_NAME: quay.io/blockstack/bitcoind
-  CONTEXT: ./Dockerfiles/bitcoin
-  DOCKERFILE: ./Dockerfiles/bitcoin/Dockerfile.alpine.multistage
+  CONTEXT: Dockerfiles/bitcoin
+  DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine.multistage
 
 on:
   push:
