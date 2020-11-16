@@ -37,7 +37,9 @@ jobs:
           #tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           build-args: BTC_VERSION=${{ env.RELEASE_VERSION }}
           push: false
-
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
