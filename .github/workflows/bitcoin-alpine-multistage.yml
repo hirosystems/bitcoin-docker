@@ -54,4 +54,4 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           tags: |
             ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
-            blockstack/bitcoind:${{ env.RELEASE_VERSION }}
+            ${{ env.DOCKERHUB_IMAGE }}:${{ env.RELEASE_VERSION }}
