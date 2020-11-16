@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Get release version
         id: get_version
-        run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
+        run: pwd && ls -al 
 
       - name: Login to Quay
         uses: docker/login-action@v1
