@@ -1,0 +1,65 @@
+FROM alpine as builder
+
+# OPTS options: --metrics, --with_diff, --bdb-version=1.2.3
+ARG OPTS
+ENV OPTS="${OPTS}"
+ARG BTC_VERSION
+WORKDIR /
+COPY ./make_binary_dist.sh /make_binary_dist.sh
+COPY ./no_rpc.diff /srv/no_rpc.diff
+RUN apk --no-cache add --update \
+    libgcc \
+    boost-dev \
+    boost-thread \
+    boost-filesystem \
+    boost-system \
+    openssl \
+    autoconf \
+    libtool \
+    pkgconf \
+    pkgconf-dev \
+    libevent \
+    git \
+    czmq-dev \
+    libzmq \
+    gcc \
+    g++ \
+    openssl-dev \
+    libevent-dev \
+    make \
+    automake \
+    musl-dev \
+    linux-headers \
+    libc-dev \
+    db-c++ \
+    patch \
+    && /sbin/ldconfig /usr/lib /lib \
+    && sh /make_binary_dist.sh ${OPTS}
+
+#CMD ["/bin/sh", "-c", "/make_binary_dist.sh", "${OPTS}"]
+##############################################################
+FROM alpine
+ARG BTC_VERSION
+ENV BTC_CONF="/etc/bitcoin/bitcoin.conf"
+ENV BTC_DATA="/root/.bitcoin"
+ENV BTC_PID="/run/bitcoind.pid"
+
+WORKDIR /
+COPY ./configs/bitcoin.conf.mainnet ${BTC_CONF}
+COPY ./configs/bitcoin.conf.testnet ${BTC_CONF}.testnet
+COPY ./configs/bitcoin.conf.regtest ${BTC_CONF}.regtest
+
+RUN apk add --no-cache --update \
+    curl \
+    boost-system \
+    boost-filesystem \
+    boost-thread \
+    boost-chrono \
+    libevent \
+    libzmq \
+    libgcc \
+    && mkdir /root/.bitcoin \
+    && apk del curl ca-certificates
+COPY --from=builder /srv/bitcoind/bitcoin-*/bin/* /usr/local/bin/
+
+CMD ["/bin/sh", "-c", "/usr/local/bin/bitcoind -conf=${BTC_CONF} -pid=${BTC_PID} -datadir=${BTC_DATA}"]

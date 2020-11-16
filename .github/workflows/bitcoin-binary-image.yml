@@ -1,0 +1,38 @@
+name: bitcoind
+env:
+  IMAGE_NAME: blockstack/bitcoind
+  CONTEXT: Dockerfiles/bitcoin
+
+on:
+  push:
+    paths:
+      - Dockerfiles/bitcoin/**
+      - .github/workflows/bitcoin-binary-image.yml
+  pull_request:
+    paths:
+      - Dockerfiles/bitcoin/**
+      - .github/workflows/bitcoin-binary-image.yml
+
+jobs:
+  build:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get release version
+        id: get_version
+        run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
+
+      - name: Build Image
+        uses: docker/build-push-action@v1
+        with:
+          repository: ${{ env.IMAGE_NAME }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+          registry: quay.io
+          tags: ${{ env.RELEASE_VERSION }}
+          tag_with_ref: true
+          tag_with_sha: false
+          path: ${{ env.CONTEXT }}
+          build_args: BTC_VERSION=${{ env.RELEASE_VERSION }}
+          add_git_labels: true
+          push: ${{ github.ref == 'refs/heads/master' }}
