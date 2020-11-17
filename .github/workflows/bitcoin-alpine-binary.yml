@@ -36,6 +36,9 @@ jobs:
   build:
     name: Upload Release Asset
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build: ["", "-norpc"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -58,6 +61,7 @@ jobs:
           tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
           build-args: |
             BTC_VERSION=${{ env.RELEASE_VERSION }}
+            BTC_BUILD=${{ matrix.build }}
           push: false
 
       - name: Copy Binary to Local
