@@ -1,7 +1,46 @@
-FROM quay.io/blockstack/bitcoind:binary-small
+FROM alpine
 
+# OPTS options: -statoshi, -norpc, -bdb-version=1.2.3
 ARG OPTS
 ENV OPTS="${OPTS}"
 ARG BTC_VERSION
 WORKDIR /
-RUN apk --no-cache add --update
+COPY ./make_binary_dist.sh /make_binary_dist.sh
+COPY ./no_rpc.diff /srv/no_rpc.diff
+RUN apk --no-cache add --update \
+    libgcc \
+    boost-dev \
+    boost-thread \
+    boost-filesystem \
+    boost-system \
+    openssl \
+    autoconf \
+    libtool \
+    pkgconf \
+    pkgconf-dev \
+    libevent \
+    git \
+    czmq-dev \
+    libzmq \
+    gcc \
+    g++ \
+    openssl-dev \
+    libevent-dev \
+    make \
+    automake \
+    musl-dev \
+    linux-headers \
+    libc-dev \
+    db-c++ \
+    patch \
+    && /sbin/ldconfig /usr/lib /lib \
+    && sh /make_binary_dist.sh ${OPTS}
+
+
+# FROM quay.io/blockstack/bitcoind:binary-small
+#
+# ARG OPTS
+# ENV OPTS="${OPTS}"
+# ARG BTC_VERSION
+# WORKDIR /
+# RUN apk --no-cache add --update
