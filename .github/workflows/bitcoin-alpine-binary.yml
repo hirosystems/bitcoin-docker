@@ -19,6 +19,15 @@ on:
       - .github/workflows/bitcoin-alpine-binary.yml
 
 jobs:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node: [6, 8, 10]
+  #   steps:
+  #     - uses: actions/setup-node@v1
+  #       with:
+  #         node-version: ${{ matrix.node }}
   build:
     name: Upload Release Asset
     runs-on: ubuntu-latest
@@ -38,7 +47,7 @@ jobs:
         with:
           file: ${{ env.DOCKERFILE }}
           context: ${{ env.CONTEXT }}
-          #tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           build-args: BTC_VERSION=${{ env.RELEASE_VERSION }}
           push: false
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -47,26 +56,31 @@ jobs:
       - name: Generate Changelog
         run: echo "Bitcoin Core ${{ env.RELEASE_VERSION }}" > ${{ github.workflow }}-CHANGELOG.txt
 
+      - name: Copy Binary to Local
+        shell: bash
+        run: |
+          docker rm -f bitcoin-binary || true
+          docker create --name bitcoin-binary ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          docker cp bitcoin-binary:/srv/build build
+          docker rm -f bitcoin-binary
+
+# - name: Archive production artifacts
+#   uses: actions/upload-artifact@v2
+#   with:
+#     name: dist-without-markdown
+#     path: |
+#       dist
+#       !dist/**/*.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
           tag_name: ${{ env.RELEASE_VERSION }}
           body_path: ${{ github.workflow }}-CHANGELOG.txt
-          files: *.tar.gz
+          files: build/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Create GitHub Release
-      #   id: create_release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
-      #     tag_name: ${{ env.RELEASE_VERSION }}
-      #     files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
-      #     body_path: ${{ github.workflow }}-CHANGELOG.txt
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
 ####################################################################################
