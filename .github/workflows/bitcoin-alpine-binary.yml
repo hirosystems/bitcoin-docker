@@ -48,15 +48,28 @@ jobs:
         run: echo "Bitcoin Core ${{ env.RELEASE_VERSION }}" > ${{ github.workflow }}-CHANGELOG.txt
 
       - name: Create GitHub Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
           tag_name: ${{ env.RELEASE_VERSION }}
-          files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
           body_path: ${{ github.workflow }}-CHANGELOG.txt
+          files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Create GitHub Release
+      #   id: create_release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
+      #     tag_name: ${{ env.RELEASE_VERSION }}
+      #     files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
+      #     body_path: ${{ github.workflow }}-CHANGELOG.txt
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+####################################################################################
       # - name: Create Release
       #   id: create_release
       #   uses: actions/create-release@v1
@@ -69,14 +82,14 @@ jobs:
       #     prerelease: false
       #     # repo: xxx
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          # upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: /srv/musl-v${{ env.RELEASE_VERSION }}.tar.gz
-          asset_name: musl-${{ env.RELEASE_VERSION }}.tar.gz
-          asset_content_type: application/zip
+      # - name: Upload Release Asset
+      #   id: upload-release-asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+      #     # upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+      #     asset_path: /srv/musl-v${{ env.RELEASE_VERSION }}.tar.gz
+      #     asset_name: musl-${{ env.RELEASE_VERSION }}.tar.gz
+      #     asset_content_type: application/zip
