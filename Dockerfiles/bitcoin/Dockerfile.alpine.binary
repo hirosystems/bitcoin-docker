@@ -1,4 +1,4 @@
-FROM quay.io/blockstack/bitcoind:binary-test
+FROM quay.io/blockstack/bitcoind:binary-small
 
 ARG OPTS
 ENV OPTS="${OPTS}"

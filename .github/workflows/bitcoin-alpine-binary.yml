@@ -53,7 +53,7 @@ jobs:
           name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
           tag_name: ${{ env.RELEASE_VERSION }}
           body_path: ${{ github.workflow }}-CHANGELOG.txt
-          files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
+          files: /srv/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
