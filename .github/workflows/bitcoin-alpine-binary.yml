@@ -65,25 +65,25 @@ jobs:
           docker cp bitcoin-binary:/srv/build build
           docker rm -f bitcoin-binary
 
-    # - name: Archive binary artifacts
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: binary-archive
-    #     path: |
-    #       build
-    #
+      - name: Archive binary artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: binary-archive
+          path: |
+            build
+
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
           tag_name: ${{ env.RELEASE_VERSION }}
-          # body_path: ${{ github.workflow }}-CHANGELOG.txt
           files: build/*.tar.gz
-          body: |
-            Alpine Bitcoin Binaries for version: ${{ env.RELEASE_VERSION }}
-            - statoshi fork: https://github.com/jlopp/statoshi
-            - btc main: https://github.com/bitcoin/bitcoin
-            - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
+          # body_path: ${{ github.workflow }}-CHANGELOG.txt
+          # body: |
+          #   Alpine Bitcoin Binaries for version: ${{ env.RELEASE_VERSION }}
+          #   - statoshi fork: https://github.com/jlopp/statoshi
+          #   - btc main: https://github.com/bitcoin/bitcoin
+          #   - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
