@@ -57,7 +57,7 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           context: ${{ env.CONTEXT }}
           # tags: localhost:5000/bitcoind
-          tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+          tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           build-args: BTC_VERSION=${{ env.RELEASE_VERSION }}
           push: false
           # cache-from: type=local,src=/tmp/.buildx-cache
@@ -73,7 +73,7 @@ jobs:
         shell: bash
         run: |
           docker rm -f bitcoin-binary || true
-          docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+          docker create --name bitcoin-binary ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
           docker cp bitcoin-binary:/srv/build build
           docker rm -f bitcoin-binary
 
