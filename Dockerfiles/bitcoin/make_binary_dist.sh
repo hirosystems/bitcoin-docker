@@ -1,9 +1,10 @@
 #!/bin/sh -x
 
-WITH_DIFF=0
+NO_RPC=0
 STATOSHI=0
 WITH_MUSL=1
 DEST_DIR="/srv/bitcoind"
+BINARY_DEST="/srv/build"
 BERKELEYDB_VERSION="db-4.8.30.NC"
 BERKELEYDB_PREFIX="/opt/${BERKELEYDB_VERSION}"
 OPTS=""
@@ -11,19 +12,20 @@ SUFFIX=""
 
 for arg in "$@"; do
   case $arg in
-      "--glibc" )
+      "-glibc" )
         WITH_MUSL=0;;
-      "--no-rpc" )
-         WITH_DIFF=1;;
-      "--metrics" )
+      "-norpc" )
+         NO_RPC=1;;
+      "-statoshi" )
         STATOSHI=1;;
-      "--bdb-version="* )
+      "-bdb-version="* )
          BERKELEYDB_VERSION="${arg#*=}";;
       "-h" )
          echo "$0 <options>"
-         echo "\t--with-diff\t\tBuild BTC without a wallet/some RPC commands"
-         echo "\t--metrics\t\t\tBuild BTC from 'statoshi' fork: https://github.com/jlopp/statoshi"
-         echo "\t--bdb-version=[db-4.8.30.NC]\tVersion of Berkeley DB to use [ default: db-4.8.30.NC ]"
+         echo "\t-glibc\t\tBuild binaries with GLIBC"
+         echo "\t-norpc\t\tBuild BTC without a wallet/some RPC commands"
+         echo "\t-statoshi\t\t\tBuild BTC from 'statoshi' fork: https://github.com/jlopp/statoshi"
+         echo "\t-bdb-version=[db-4.8.30.NC]\tVersion of Berkeley DB to use [ default: db-4.8.30.NC ]"
          exit 0;;
   esac
 done
@@ -32,9 +34,9 @@ if [ $STATOSHI -eq 1 ]; then
   GIT_REPO="https://github.com/jlopp/statoshi"
   echo "\t - building with statoshi metrics fork"
   SUFFIX="-statoshi"
-  WITH_DIFF=0
+  NO_RPC=0
 fi
-if [ $WITH_DIFF -eq 1 -a $STATOSHI -ne 1 ]; then
+if [ $NO_RPC -eq 1 -a $STATOSHI -ne 1 ]; then
   SUFFIX="-norpc"
   echo "\t - building with diff file patched"
 fi
@@ -52,7 +54,7 @@ echo ""
 git clone ${GIT_REPO} ${DEST_DIR}
 cd ${DEST_DIR}
 
-if [ $WITH_DIFF -eq 1 ]; then
+if [ $NO_RPC -eq 1 ]; then
   OPTS="--disable-wallet"
   cp /srv/no_rpc.diff .
   patch -p1 < no_rpc.diff
@@ -137,11 +139,5 @@ cp -a doc/man/bitcoin-cli.1 ${BINARY_DIR}/share/man/man1/
 cp -a doc/man/bitcoin-tx.1 ${BINARY_DIR}/share/man/man1/
 cp -a doc/man/bitcoind.1 ${BINARY_DIR}/share/man/man1/
 tar -cf ${BINARY_ARCHIVE}.tar ${BINARY_DIR} && gzip ${BINARY_ARCHIVE}.tar
-mv ${BINARY_ARCHIVE}.tar.gz ../${BINARY_ARCHIVE}.tar.gz
-# rm -rf ${BINARY_DIR}
-
-# echo ""
-# echo "Cleaning up"
-# echo ""
-# make distclean
-# rm -rf $DEST_DIR
+mkdir ${BINARY_DEST}
+mv ${BINARY_ARCHIVE}.tar.gz ${BINARY_DEST}/${BINARY_ARCHIVE}.tar.gz

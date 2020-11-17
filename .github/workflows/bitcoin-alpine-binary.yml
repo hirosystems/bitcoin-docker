@@ -1,19 +1,24 @@
 name: bitcoin-alpine-binary
 env:
-  IMAGE_NAME: quay.io/blockstack/bitcoind
+  QUAY_IMAGE: quay.io/blockstack/bitcoind
+  DOCKERHUB_IMAGE: blockstack/bitcoind
   CONTEXT: Dockerfiles/bitcoin
-  DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine.binary
+  BINARY_DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine.binary
+  DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine
+
 
 on:
   push:
     paths:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
+      - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
       - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-binary.yml
   pull_request:
     paths:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
+      - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
       - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-binary.yml
@@ -23,11 +28,11 @@ jobs:
   #   runs-on: ubuntu-latest
   #   strategy:
   #     matrix:
-  #       node: [6, 8, 10]
+  #       build: ["", "-statoshi", "-norpc"]
   #   steps:
   #     - uses: actions/setup-node@v1
   #       with:
-  #         node-version: ${{ matrix.node }}
+  #         btc-build: ${{ matrix.build }}
   build:
     name: Upload Release Asset
     runs-on: ubuntu-latest
@@ -45,33 +50,32 @@ jobs:
         id: get_version
         run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
 
-      - name: Build and push
+      - name: Build Binary Archive
         uses: docker/build-push-action@v2
         with:
-          file: ${{ env.DOCKERFILE }}
+          file: ${{ env.BINARY_DOCKERFILE }}
           context: ${{ env.CONTEXT }}
-          tags: ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
-          build-args: BTC_VERSION=${{ env.RELEASE_VERSION }}
+          tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+          build-args: |
+            BTC_VERSION=${{ env.RELEASE_VERSION }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           push: false
-
-      # - name: Generate Changelog
-      #   run: echo "Bitcoin Core ${{ env.RELEASE_VERSION }}" > ${{ github.workflow }}-CHANGELOG.txt
 
       - name: Copy Binary to Local
         shell: bash
         run: |
           docker rm -f bitcoin-binary || true
-          docker create --name bitcoin-binary ${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
           docker cp bitcoin-binary:/srv/build build
           docker rm -f bitcoin-binary
 
-      - name: Archive binary artifacts
+      - name: Archive Binary Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: binary-archive
+          name: bitcoin-${{ env.RELEASE_VERSION }}.tar.gz
           path: |
             build
-
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -87,3 +91,17 @@ jobs:
           #   - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Build and Push Image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     file: ${{ env.DOCKERFILE }}
+      #     context: ${{ env.CONTEXT }}
+      #     build-args: |
+      #       BTC_VERSION=${{ env.RELEASE_VERSION }}
+      #     push: true
+      #     cache-from: type=local,src=/tmp/.buildx-cache
+      #     cache-to: type=local,dest=/tmp/.buildx-cache
+      #     tags: |
+      #       ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+      #       ${{ env.DOCKERHUB_IMAGE }}:${{ env.RELEASE_VERSION }}
