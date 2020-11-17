@@ -7,11 +7,15 @@ env:
 on:
   push:
     paths:
-      - Dockerfiles/bitcoin/**
+      - Dockerfiles/bitcoin/Dockerfile.alpine.binary
+      - Dockerfiles/bitcoin/make_binary_dist.sh
+      - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-binary.yml
   pull_request:
     paths:
-      - Dockerfiles/bitcoin/**
+      - Dockerfiles/bitcoin/Dockerfile.alpine.binary
+      - Dockerfiles/bitcoin/make_binary_dist.sh
+      - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-binary.yml
 
 jobs:
@@ -48,6 +52,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
+          tag_name: ${{ env.RELEASE_VERSION }}
           files: /srv/*${{ env.RELEASE_VERSION }}*.tar.gz
           body_path: ${{ github.workflow }}-CHANGELOG.txt
         env:

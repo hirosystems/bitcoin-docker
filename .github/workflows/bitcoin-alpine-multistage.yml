@@ -8,11 +8,15 @@ env:
 on:
   push:
     paths:
-      - Dockerfiles/bitcoin/**
+      - Dockerfiles/bitcoin/Dockerfile.alpine.multistage
+      - Dockerfiles/bitcoin/make_binary_dist.sh
+      - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-multistage.yml
   pull_request:
     paths:
-      - Dockerfiles/bitcoin/**
+      - Dockerfiles/bitcoin/Dockerfile.alpine.multistage
+      - Dockerfiles/bitcoin/make_binary_dist.sh
+      - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine-multistage.yml
 
 jobs:
