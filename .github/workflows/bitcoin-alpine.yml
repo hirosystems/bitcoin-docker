@@ -14,14 +14,14 @@ on:
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
       - Dockerfiles/bitcoin/VERSION
-      - .github/workflows/bitcoin-alpine-binary.yml
+      - .github/workflows/bitcoin-alpine.yml
   pull_request:
     paths:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
       - Dockerfiles/bitcoin/VERSION
-      - .github/workflows/bitcoin-alpine-binary.yml
+      - .github/workflows/bitcoin-alpine.yml
 
 jobs:
   build:
