@@ -117,7 +117,7 @@ jobs:
 
   build-image:
     name: Build Docker Image
-    needs: setup, build-binary
+    needs: [setup, build-binary]
     runs-on: ubuntu-latest
     strategy:
       matrix:
