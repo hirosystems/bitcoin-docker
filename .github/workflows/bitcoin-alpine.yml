@@ -55,7 +55,7 @@ jobs:
         run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
 
   build-binary:
-    name: Bitcoin Core Build
+    name: Bitcoin Core Binary Build
     needs: setup
     runs-on: ubuntu-latest
     strategy:
