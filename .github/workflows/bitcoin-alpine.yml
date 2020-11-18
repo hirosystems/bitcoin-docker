@@ -72,9 +72,6 @@ jobs:
           # driver: docker
           driver-opts: network=host
 
-      - name: echo output
-        run: echo "Version: ${{needs.setup.outputs.btc_version}}"
-
       # - name: Build BTC Binary Archive
       #   uses: docker/build-push-action@v2
       #   with:
