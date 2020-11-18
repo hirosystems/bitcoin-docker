@@ -1,4 +1,4 @@
-name: bitcoin-alpine-binary
+name: bitcoin-alpine
 env:
   QUAY_IMAGE: quay.io/blockstack/bitcoind
   DOCKERHUB_IMAGE: blockstack/bitcoind
@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        build: [""]
-        # build: ["", "-norpc", "statoshi"]
+        build: ["-statoshi"]
+        # build: ["", "-norpc", "-statoshi"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -111,4 +111,6 @@ jobs:
           push: true
           tags: |
             ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
+            ${{ env.QUAY_IMAGE }}:latest
             ${{ env.DOCKERHUB_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
+            ${{ env.DOCKERHUB_IMAGE }}:latest
