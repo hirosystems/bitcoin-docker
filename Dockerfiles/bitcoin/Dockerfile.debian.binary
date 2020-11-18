@@ -1,37 +1,32 @@
-FROM alpine
+FROM debian:stretch-slim
 
-# OPTS options: --metrics, --with_diff, --bdb-version=1.2.3
-ARG OPTS
-ENV OPTS="${OPTS}"
+# BTC_BUILD options: -statoshi, -norpc, -bdb-version=1.2.3
+ARG BTC_BUILD
 ARG BTC_VERSION
+ENV BTC_BUILD=${BTC_BUILD}
+ENV BTC_VERSION=${BTC_VERSION}
 WORKDIR /
 COPY ./make_binary_dist.sh /make_binary_dist.sh
 COPY ./no_rpc.diff /srv/no_rpc.diff
-RUN apk --no-cache add --update \
-    libgcc \
-    boost-dev \
-    boost-thread \
-    boost-filesystem \
-    boost-system \
-    openssl \
-    autoconf \
-    libtool \
-    pkgconf \
-    pkgconf-dev \
-    libevent \
-    git \
-    czmq-dev \
-    libzmq \
-    gcc \
-    g++ \
-    openssl-dev \
-    libevent-dev \
-    make \
-    automake \
-    musl-dev \
-    linux-headers \
-    libc-dev \
-    db-c++ \
-    patch \
-    && /sbin/ldconfig /usr/lib /lib \
-    && sh /make_binary_dist.sh ${OPTS}
+RUN apt-get update && apt-get install -y \
+  autoconf \
+  build-essential \
+  libtool \
+  pkg-config \
+  python3 \
+  libboost-dev \
+  libboost-system-dev \
+  libboost-filesystem-dev \
+  libboost-thread-dev \
+  libssl-dev \
+  libevent-dev \
+  git \
+  libczmq-dev \
+  wget \
+  && /sbin/ldconfig /usr/lib /lib \
+  && sh /make_binary_dist.sh -glibc ${BTC_BUILD}
+
+
+
+
+47371675

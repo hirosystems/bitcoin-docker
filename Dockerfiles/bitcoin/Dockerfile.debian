@@ -1,15 +1,14 @@
-FROM debian:latest
+FROM debian:stretch-slim
 
 ENV BTC_CONF="/etc/bitcoin/bitcoin.conf"
 ENV BTC_DATA="/root/.bitcoin"
 ENV BTC_PID="/run/bitcoind.pid"
 
-#ARG BTC_VERSION="0.20.99.0"
 ARG BTC_VERSION
+ARG BTC_BUILD
+ARG BTC_LIBC=glibc
 ARG REPO="https://github.com/blockstackpbc/bitcoin-docker"
-ARG BTC_URL="${REPO}/releases/download/${BTC_VERSION}/glibc-v${BTC_VERSION}.tar.gz"
-# ARG BTC_URL="${REPO}/releases/download/${BTC_VERSION}/glibc-v${BTC_VERSION}-norpc.tar.gz"
-# ARG BTC_URL="${REPO}/releases/download/${BTC_VERSION}/glibc-v${BTC_VERSION}-statoshi.tar.gz"
+ARG BTC_URL="${REPO}/releases/download/${BTC_VERSION}/${BTC_LIBC}-v${BTC_VERSION}${BTC_BUILD}.tar.gz"
 
 WORKDIR /
 COPY ./configs/bitcoin.conf.mainnet ${BTC_CONF}
@@ -31,5 +30,4 @@ RUN apt-get update \
     && mv /bitcoin-*/bin/* /usr/local/bin/ \
     && rm -rf /bitcoin-*
 
-EXPOSE 8332 8333 18332 18333
 ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/bitcoind -conf=${BTC_CONF} -pid=${BTC_PID} -datadir=${BTC_DATA}"]

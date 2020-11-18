@@ -22,26 +22,45 @@ for arg in "$@"; do
          BERKELEYDB_VERSION="${arg#*=}";;
       "-h" )
          echo "$0 <options>"
-         echo "\t-glibc\t\tBuild binaries with GLIBC"
-         echo "\t-norpc\t\tBuild BTC without a wallet/some RPC commands"
-         echo "\t-statoshi\t\t\tBuild BTC from 'statoshi' fork: https://github.com/jlopp/statoshi"
-         echo "\t-bdb-version=[db-4.8.30.NC]\tVersion of Berkeley DB to use [ default: db-4.8.30.NC ]"
+         echo " -glibc      Build binaries with GLIBC"
+         echo " -norpc      Build BTC without a wallet/some RPC commands"
+         echo " -statoshi   Build BTC from 'statoshi' fork: https://github.com/jlopp/statoshi"
+         echo " -bdb-version=[db-4.8.30.NC]   Version of Berkeley DB to use [ default: db-4.8.30.NC ]"
          exit 0;;
   esac
 done
 GIT_REPO="https://github.com/bitcoin/bitcoin"
 if [ $STATOSHI -eq 1 ]; then
   GIT_REPO="https://github.com/jlopp/statoshi"
-  echo "\t - building with statoshi metrics fork"
+  echo "   - building with statoshi metrics fork"
   SUFFIX="-statoshi"
   NO_RPC=0
 fi
 if [ $NO_RPC -eq 1 -a $STATOSHI -ne 1 ]; then
   SUFFIX="-norpc"
-  echo "\t - building with diff file patched"
+  echo "   - building with diff file patched"
 fi
 
-echo "Suffix: $SUFFIX"
+if [ $WITH_MUSL -eq 0 ]; then
+  BINARY_ARCHIVE="glibc-v${BTC_VERSION}${SUFFIX}"
+else
+  BINARY_ARCHIVE="musl-v${BTC_VERSION}${SUFFIX}"
+fi
+BINARY_DIR="bitcoin-${BTC_VERSION}"
+
+
+echo ""
+echo ""
+echo "Script Vars:"
+echo "WITH_MUSL: $WITH_MUSL"
+echo "NO_RPC: $NO_RPC"
+echo "STATOSHI: $STATOSHI"
+echo "BERKELEYDB_VERSION: $BERKELEYDB_VERSION"
+echo "SUFFIX: $SUFFIX"
+echo "BTC_VERSION: ${BTC_VERSION}${SUFFIX}"
+echo "BINARY_DIR: ${BINARY_DIR}"
+echo "BINARY_ARCHIVE: $BINARY_ARCHIVE"
+echo ""
 echo ""
 
 if [ -d ${DEST_DIR} ]; then
@@ -107,14 +126,6 @@ make STATIC=1
 echo ""
 echo "Creating Binary dist"
 echo ""
-if [ $WITH_MUSL -eq 0 ]; then
-  BINARY_ARCHIVE="glibc-v${BTC_VERSION}${SUFFIX}"
-else
-  BINARY_ARCHIVE="musl-v${BTC_VERSION}${SUFFIX}"
-fi
-BINARY_DIR="bitcoin-${BTC_VERSION}"
-echo "BTC_VERSION: ${BTC_VERSION}${SUFFIX}"
-echo "BINARY_DIR: ${BINARY_DIR}"
 
 if [ -d ${BINARY_DIR} ]; then
   rm -rf ${BINARY_DIR}
