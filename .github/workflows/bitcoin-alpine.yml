@@ -103,7 +103,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Bitcoin Core - ${{setup.outputs.btc_version}}
+          name: Bitcoin Core - ${{needs.setup.outputs.btc_version}}
           tag_name: ${{needs.setup.outputs.btc_version}}
           files: build/*.tar.gz
           # body_path: ${{ github.workflow }}-CHANGELOG.txt
