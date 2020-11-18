@@ -54,78 +54,78 @@ jobs:
         id: get_version
         run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
 
-  build-binary:
-    name: Bitcoin Core Binary Build
-    needs: setup
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        build: ["", "-statoshi"]
-        # build: ["", "-norpc", "-statoshi"]
-    steps:
-
-      # - name: Build BTC Binary Archive
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     load: true
-      #     file: ${{ env.BINARY_DOCKERFILE }}
-      #     context: ${{ env.CONTEXT }}
-      #     tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
-      #     build-args: |
-      #       BTC_VERSION=${{ env.RELEASE_VERSION }}
-      #       BTC_BUILD=${{ matrix.build }}
-      #     push: false
-      #
-      # - name: Copy BTC Binary Archive
-      #   shell: bash
-      #   run: |
-      #     docker rm -f bitcoin-binary || true
-      #     docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
-      #     docker cp bitcoin-binary:/srv/build build
-      #     docker rm -f bitcoin-binary
-      #
-      # - name: Upload BTC Binary Artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: bitcoin-${{ env.RELEASE_VERSION }}.tar.gz
-      #     path: |
-      #       build
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
-          tag_name: ${{ env.RELEASE_VERSION }}
-          files: build/*.tar.gz
-          # body_path: ${{ github.workflow }}-CHANGELOG.txt
-          # body: |
-          #   Alpine Bitcoin Binaries for version: ${{ env.RELEASE_VERSION }}
-          #   - statoshi fork: https://github.com/jlopp/statoshi
-          #   - btc main: https://github.com/bitcoin/bitcoin
-          #   - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-image:
-    name: Build Docker Image
-    needs: build-binary
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        fail-fast: true
-        build: ["", "-statoshi"]
-        # build: ["", "-norpc", "-statoshi"]
-    steps:
-      - name: Build and Push Image
-        uses: docker/build-push-action@v2
-        with:
-          file: ${{ env.DOCKERFILE }}
-          context: ${{ env.CONTEXT }}
-          build-args: |
-            BTC_VERSION=${{ env.RELEASE_VERSION }}
-            BTC_BUILD=${{ matrix.build }}
-          push: true
-          tags: |
-            ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
-            ${{ env.DOCKERHUB_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
+  # build-binary:
+  #   name: Bitcoin Core Binary Build
+  #   needs: setup
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     # fail-fast: true
+  #     matrix:
+  #       build: ["", "-statoshi"]
+  #       # build: ["", "-norpc", "-statoshi"]
+  #   steps:
+  #
+  #     # - name: Build BTC Binary Archive
+  #     #   uses: docker/build-push-action@v2
+  #     #   with:
+  #     #     load: true
+  #     #     file: ${{ env.BINARY_DOCKERFILE }}
+  #     #     context: ${{ env.CONTEXT }}
+  #     #     tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+  #     #     build-args: |
+  #     #       BTC_VERSION=${{ env.RELEASE_VERSION }}
+  #     #       BTC_BUILD=${{ matrix.build }}
+  #     #     push: false
+  #     #
+  #     # - name: Copy BTC Binary Archive
+  #     #   shell: bash
+  #     #   run: |
+  #     #     docker rm -f bitcoin-binary || true
+  #     #     docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+  #     #     docker cp bitcoin-binary:/srv/build build
+  #     #     docker rm -f bitcoin-binary
+  #     #
+  #     # - name: Upload BTC Binary Artifacts
+  #     #   uses: actions/upload-artifact@v2
+  #     #   with:
+  #     #     name: bitcoin-${{ env.RELEASE_VERSION }}.tar.gz
+  #     #     path: |
+  #     #       build
+  #
+  #     - name: Create GitHub Release
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         name: Bitcoin Core - ${{ env.RELEASE_VERSION }}
+  #         tag_name: ${{ env.RELEASE_VERSION }}
+  #         files: build/*.tar.gz
+  #         # body_path: ${{ github.workflow }}-CHANGELOG.txt
+  #         # body: |
+  #         #   Alpine Bitcoin Binaries for version: ${{ env.RELEASE_VERSION }}
+  #         #   - statoshi fork: https://github.com/jlopp/statoshi
+  #         #   - btc main: https://github.com/bitcoin/bitcoin
+  #         #   - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #
+  # build-image:
+  #   name: Build Docker Image
+  #   needs: build-binary
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       # fail-fast: true
+  #       build: ["", "-statoshi"]
+  #       # build: ["", "-norpc", "-statoshi"]
+  #   steps:
+  #     - name: Build and Push Image
+  #       uses: docker/build-push-action@v2
+  #       with:
+  #         file: ${{ env.DOCKERFILE }}
+  #         context: ${{ env.CONTEXT }}
+  #         build-args: |
+  #           BTC_VERSION=${{ env.RELEASE_VERSION }}
+  #           BTC_BUILD=${{ matrix.build }}
+  #         push: true
+  #         tags: |
+  #           ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
+  #           ${{ env.DOCKERHUB_IMAGE }}:${{ env.RELEASE_VERSION }}${{ matrix.build }}
