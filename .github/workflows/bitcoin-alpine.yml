@@ -24,14 +24,23 @@ on:
       - .github/workflows/bitcoin-alpine.yml
 
 jobs:
-  build:
-    name: Bitcoin Core Build
+  setup:
+    name: Setup Action
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build: ["", "-statoshi"]
-        # build: ["", "-norpc", "-statoshi"]
     steps:
+      - name: Login to Quay
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Login to Dockerhub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -45,32 +54,43 @@ jobs:
         id: get_version
         run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
 
-      - name: Build BTC Binary Archive
-        uses: docker/build-push-action@v2
-        with:
-          load: true
-          file: ${{ env.BINARY_DOCKERFILE }}
-          context: ${{ env.CONTEXT }}
-          tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
-          build-args: |
-            BTC_VERSION=${{ env.RELEASE_VERSION }}
-            BTC_BUILD=${{ matrix.build }}
-          push: false
+  build-binary:
+    name: Bitcoin Core Build
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        build: ["", "-statoshi"]
+        # build: ["", "-norpc", "-statoshi"]
+    steps:
 
-      - name: Copy BTC Binary Archive
-        shell: bash
-        run: |
-          docker rm -f bitcoin-binary || true
-          docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
-          docker cp bitcoin-binary:/srv/build build
-          docker rm -f bitcoin-binary
-
-      - name: Upload BTC Binary Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: bitcoin-${{ env.RELEASE_VERSION }}.tar.gz
-          path: |
-            build
+      # - name: Build BTC Binary Archive
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     load: true
+      #     file: ${{ env.BINARY_DOCKERFILE }}
+      #     context: ${{ env.CONTEXT }}
+      #     tags: ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+      #     build-args: |
+      #       BTC_VERSION=${{ env.RELEASE_VERSION }}
+      #       BTC_BUILD=${{ matrix.build }}
+      #     push: false
+      #
+      # - name: Copy BTC Binary Archive
+      #   shell: bash
+      #   run: |
+      #     docker rm -f bitcoin-binary || true
+      #     docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{ env.RELEASE_VERSION }}
+      #     docker cp bitcoin-binary:/srv/build build
+      #     docker rm -f bitcoin-binary
+      #
+      # - name: Upload BTC Binary Artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: bitcoin-${{ env.RELEASE_VERSION }}.tar.gz
+      #     path: |
+      #       build
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -87,19 +107,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Quay
-        uses: docker/login-action@v1
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-
-      - name: Login to Dockerhub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
+  build-image:
+    name: Build Docker Image
+    needs: build-binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        fail-fast: true
+        build: ["", "-statoshi"]
+        # build: ["", "-norpc", "-statoshi"]
+    steps:
       - name: Build and Push Image
         uses: docker/build-push-action@v2
         with:
