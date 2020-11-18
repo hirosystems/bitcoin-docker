@@ -54,7 +54,7 @@ jobs:
 # - run: echo ${{needs.setup.outputs.btc_version}} ${{needs.job1.outputs.output2}}
 
   build:
-    name: Bitcoin Core Binary Build
+    name: Bitcoin Core Build
     needs: setup
     runs-on: ubuntu-latest
     strategy:
@@ -71,6 +71,9 @@ jobs:
         with:
           # driver: docker
           driver-opts: network=host
+
+      - name: echo output
+        run: echo "Version: ${{needs.setup.outputs.btc_version}}"
 
       # - name: Build BTC Binary Archive
       #   uses: docker/build-push-action@v2
@@ -120,19 +123,19 @@ jobs:
           file: ${{ env.DOCKERFILE }}
           context: ${{ env.CONTEXT }}
           build-args: |
-            BTC_VERSION=${{needs.setup.outputs.btc_version}}
+            BTC_VERSION=${{setup.outputs.btc_version}}
             BTC_BUILD=${{ matrix.build }}
           push: true
           tags: |
-            ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}}${{ matrix.build }}
-            ${{ env.DOCKERHUB_IMAGE }}:${{needs.setup.outputs.btc_version}}${{ matrix.build }}
+            ${{ env.QUAY_IMAGE }}:${{setup.outputs.btc_version}}${{ matrix.build }}
+            ${{ env.DOCKERHUB_IMAGE }}:${{setup.outputs.btc_version}}${{ matrix.build }}
 
 
       # - name: Tag Latest
       #   if: ${{ matrix.build == '' }}
       #   run: |
-      #     docker tag ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}} ${{ env.QUAY_IMAGE }}:latest
-      #     docker tag ${{ env.DOCKERHUB_IMAGE }}:${{needs.setup.outputs.btc_version}}${{ matrix.build }} ${{ env.DOCKERHUB_IMAGE }}:latest
+      #     docker tag ${{ env.QUAY_IMAGE }}:${{setup.outputs.btc_version}} ${{ env.QUAY_IMAGE }}:latest
+      #     docker tag ${{ env.DOCKERHUB_IMAGE }}:${{setup.outputs.btc_version}}${{ matrix.build }} ${{ env.DOCKERHUB_IMAGE }}:latest
       #     docker images
       #     docker push ${{ env.QUAY_IMAGE }}:latest
       #     docker push ${{ env.DOCKERHUB_IMAGE }}:latest
