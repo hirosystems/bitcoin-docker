@@ -30,6 +30,7 @@ for arg in "$@"; do
   esac
 done
 GIT_REPO="https://github.com/bitcoin/bitcoin"
+
 if [ $STATOSHI -eq 1 ]; then
   GIT_REPO="https://github.com/jlopp/statoshi"
   echo "   - building with statoshi metrics fork"
@@ -70,13 +71,23 @@ fi
 echo ""
 echo "Cloning ${GIT_REPO} into ${DEST_DIR}"
 echo ""
-git clone ${GIT_REPO} ${DEST_DIR}
+if [ $STATOSHI -ne 1 ]; then
+  git clone --depth 1 --branch v${BTC_VERSION} ${GIT_REPO} ${DEST_DIR}
+else
+  git clone ${GIT_REPO} ${DEST_DIR}
+fi
+
+# git clone ${GIT_REPO} ${DEST_DIR}
 cd ${DEST_DIR}
 
 if [ $NO_RPC -eq 1 ]; then
   OPTS="--disable-wallet"
   cp /srv/no_rpc.diff .
   patch -p1 < no_rpc.diff
+  if [ $? -ne 0 ]; then
+    echo "Patch Failed...exiting"
+    exit 0
+  fi
 else
   echo ""
   echo "Building Berkeley DB Version:$BERKELEYDB_VERSION"

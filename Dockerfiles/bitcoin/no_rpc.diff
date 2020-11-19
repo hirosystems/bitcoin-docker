@@ -1,8 +1,8 @@
 diff --git a/src/rpc/blockchain.cpp b/src/rpc/blockchain.cpp
-index 392073d04..a0f7f10c1 100644
+index 097b1f2..52a225c 100644
 --- a/src/rpc/blockchain.cpp
 +++ b/src/rpc/blockchain.cpp
-@@ -2467,38 +2467,38 @@ static const CRPCCommand commands[] =
+@@ -2348,38 +2348,38 @@ static const CRPCCommand commands[] =
  { //  category              name                      actor (function)         argNames
    //  --------------------- ------------------------  -----------------------  ----------
      { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      {} },
@@ -22,9 +22,9 @@ index 392073d04..a0f7f10c1 100644
 -    { "blockchain",         "getmempooldescendants",  &getmempooldescendants,  {"txid","verbose"} },
 -    { "blockchain",         "getmempoolentry",        &getmempoolentry,        {"txid"} },
 -    { "blockchain",         "getmempoolinfo",         &getmempoolinfo,         {} },
--    { "blockchain",         "getrawmempool",          &getrawmempool,          {"verbose", "mempool_sequence"} },
+-    { "blockchain",         "getrawmempool",          &getrawmempool,          {"verbose"} },
 -    { "blockchain",         "gettxout",               &gettxout,               {"txid","n","include_mempool"} },
--    { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        {"hash_type"} },
+-    { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        {} },
 -    { "blockchain",         "pruneblockchain",        &pruneblockchain,        {"height"} },
 -    { "blockchain",         "savemempool",            &savemempool,            {} },
 -    { "blockchain",         "verifychain",            &verifychain,            {"checklevel","nblocks"} },
@@ -41,9 +41,9 @@ index 392073d04..a0f7f10c1 100644
 +    // { "blockchain",         "getmempooldescendants",  &getmempooldescendants,  {"txid","verbose"} },
 +    // { "blockchain",         "getmempoolentry",        &getmempoolentry,        {"txid"} },
 +    // { "blockchain",         "getmempoolinfo",         &getmempoolinfo,         {} },
-+    // { "blockchain",         "getrawmempool",          &getrawmempool,          {"verbose", "mempool_sequence"} },
++    // { "blockchain",         "getrawmempool",          &getrawmempool,          {"verbose"} },
 +    // { "blockchain",         "gettxout",               &gettxout,               {"txid","n","include_mempool"} },
-+    // { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        {"hash_type"} },
++    // { "blockchain",         "gettxoutsetinfo",        &gettxoutsetinfo,        {} },
 +    // { "blockchain",         "pruneblockchain",        &pruneblockchain,        {"height"} },
 +    // { "blockchain",         "savemempool",            &savemempool,            {} },
 +    // { "blockchain",         "verifychain",            &verifychain,            {"checklevel","nblocks"} },
@@ -69,12 +69,12 @@ index 392073d04..a0f7f10c1 100644
 +    // { "hidden",             "dumptxoutset",           &dumptxoutset,           {"path"} },
  };
  // clang-format on
-     for (const auto& c : commands) {
+
 diff --git a/src/rpc/client.cpp b/src/rpc/client.cpp
-index 88c8ebe1f..f938477a2 100644
+index c176248..bf1f24e 100644
 --- a/src/rpc/client.cpp
 +++ b/src/rpc/client.cpp
-@@ -26,165 +26,165 @@ public:
+@@ -26,152 +26,152 @@ public:
   */
  static const CRPCConvertParam vRPCConvertParams[] =
  {
@@ -85,7 +85,6 @@ index 88c8ebe1f..f938477a2 100644
 -    { "generatetoaddress", 2, "maxtries" },
 -    { "generatetodescriptor", 0, "num_blocks" },
 -    { "generatetodescriptor", 2, "maxtries" },
--    { "generateblock", 1, "transactions" },
 -    { "getnetworkhashps", 0, "nblocks" },
 -    { "getnetworkhashps", 1, "height" },
 -    { "sendtoaddress", 1, "amount" },
@@ -93,7 +92,6 @@ index 88c8ebe1f..f938477a2 100644
 -    { "sendtoaddress", 5 , "replaceable" },
 -    { "sendtoaddress", 6 , "conf_target" },
 -    { "sendtoaddress", 8, "avoid_reuse" },
--    { "sendtoaddress", 9, "verbose"},
 -    { "settxfee", 0, "amount" },
 -    { "sethdseed", 0, "newkeypool" },
 -    { "getreceivedbyaddress", 1, "minconf" },
@@ -125,7 +123,6 @@ index 88c8ebe1f..f938477a2 100644
 -    { "sendmany", 4, "subtractfeefrom" },
 -    { "sendmany", 5 , "replaceable" },
 -    { "sendmany", 6 , "conf_target" },
--    { "sendmany", 8, "verbose" },
 -    { "deriveaddresses", 1, "range" },
 -    { "scantxoutset", 1, "scanobjects" },
 -    { "addmultisigaddress", 0, "nrequired" },
@@ -150,7 +147,6 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "generatetoaddress", 2, "maxtries" },
 +    // { "generatetodescriptor", 0, "num_blocks" },
 +    // { "generatetodescriptor", 2, "maxtries" },
-+    // { "generateblock", 1, "transactions" },
 +    // { "getnetworkhashps", 0, "nblocks" },
 +    // { "getnetworkhashps", 1, "height" },
 +    // { "sendtoaddress", 1, "amount" },
@@ -158,7 +154,6 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "sendtoaddress", 5 , "replaceable" },
 +    // { "sendtoaddress", 6 , "conf_target" },
 +    // { "sendtoaddress", 8, "avoid_reuse" },
-+    // { "sendtoaddress", 9, "verbose"},
 +    // { "settxfee", 0, "amount" },
 +    // { "sethdseed", 0, "newkeypool" },
 +    // { "getreceivedbyaddress", 1, "minconf" },
@@ -190,7 +185,6 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "sendmany", 4, "subtractfeefrom" },
 +    // { "sendmany", 5 , "replaceable" },
 +    // { "sendmany", 6 , "conf_target" },
-+    // { "sendmany", 8, "verbose" },
 +    // { "deriveaddresses", 1, "range" },
 +    // { "scantxoutset", 1, "scanobjects" },
 +    // { "addmultisigaddress", 0, "nrequired" },
@@ -225,8 +219,10 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "signrawtransactionwithkey", 1, "privkeys" },
 +    // { "signrawtransactionwithkey", 2, "prevtxs" },
 +    // { "signrawtransactionwithwallet", 1, "prevtxs" },
+     { "sendrawtransaction", 1, "allowhighfees" },
      { "sendrawtransaction", 1, "maxfeerate" },
 -    { "testmempoolaccept", 0, "rawtxs" },
+-    { "testmempoolaccept", 1, "allowhighfees" },
 -    { "testmempoolaccept", 1, "maxfeerate" },
 -    { "combinerawtransaction", 0, "txs" },
 -    { "fundrawtransaction", 1, "options" },
@@ -252,16 +248,12 @@ index 88c8ebe1f..f938477a2 100644
 -    { "gettxoutproof", 0, "txids" },
 -    { "lockunspent", 0, "unlock" },
 -    { "lockunspent", 1, "transactions" },
--    { "send", 0, "outputs" },
--    { "send", 1, "conf_target" },
--    { "send", 3, "options" },
 -    { "importprivkey", 2, "rescan" },
 -    { "importaddress", 2, "rescan" },
 -    { "importaddress", 3, "p2sh" },
 -    { "importpubkey", 2, "rescan" },
 -    { "importmulti", 0, "requests" },
 -    { "importmulti", 1, "options" },
--    { "importdescriptors", 0, "requests" },
 -    { "verifychain", 0, "checklevel" },
 -    { "verifychain", 1, "nblocks" },
 -    { "getblockstats", 0, "hash_or_height" },
@@ -269,7 +261,6 @@ index 88c8ebe1f..f938477a2 100644
 -    { "pruneblockchain", 0, "height" },
 -    { "keypoolrefill", 0, "newsize" },
 -    { "getrawmempool", 0, "verbose" },
--    { "getrawmempool", 1, "mempool_sequence" },
 -    { "estimatesmartfee", 0, "conf_target" },
 -    { "estimaterawfee", 0, "conf_target" },
 -    { "estimaterawfee", 1, "threshold" },
@@ -282,12 +273,11 @@ index 88c8ebe1f..f938477a2 100644
 -    { "getmempoolancestors", 1, "verbose" },
 -    { "getmempooldescendants", 1, "verbose" },
 -    { "bumpfee", 1, "options" },
--    { "psbtbumpfee", 1, "options" },
 -    { "logging", 0, "include" },
 -    { "logging", 1, "exclude" },
 -    { "disconnectnode", 1, "nodeid" },
--    { "upgradewallet", 0, "version" },
 +    // { "testmempoolaccept", 0, "rawtxs" },
++    // { "testmempoolaccept", 1, "allowhighfees" },
 +    // { "testmempoolaccept", 1, "maxfeerate" },
 +    // { "combinerawtransaction", 0, "txs" },
 +    // { "fundrawtransaction", 1, "options" },
@@ -313,16 +303,12 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "gettxoutproof", 0, "txids" },
 +    // { "lockunspent", 0, "unlock" },
 +    // { "lockunspent", 1, "transactions" },
-+    // { "send", 0, "outputs" },
-+    // { "send", 1, "conf_target" },
-+    // { "send", 3, "options" },
 +    // { "importprivkey", 2, "rescan" },
 +    // { "importaddress", 2, "rescan" },
 +    // { "importaddress", 3, "p2sh" },
 +    // { "importpubkey", 2, "rescan" },
 +    // { "importmulti", 0, "requests" },
 +    // { "importmulti", 1, "options" },
-+    // { "importdescriptors", 0, "requests" },
 +    // { "verifychain", 0, "checklevel" },
 +    // { "verifychain", 1, "nblocks" },
 +    // { "getblockstats", 0, "hash_or_height" },
@@ -330,7 +316,6 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "pruneblockchain", 0, "height" },
 +    // { "keypoolrefill", 0, "newsize" },
 +    // { "getrawmempool", 0, "verbose" },
-+    // { "getrawmempool", 1, "mempool_sequence" },
 +    // { "estimatesmartfee", 0, "conf_target" },
 +    // { "estimaterawfee", 0, "conf_target" },
 +    // { "estimaterawfee", 1, "threshold" },
@@ -343,11 +328,9 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "getmempoolancestors", 1, "verbose" },
 +    // { "getmempooldescendants", 1, "verbose" },
 +    // { "bumpfee", 1, "options" },
-+    // { "psbtbumpfee", 1, "options" },
 +    // { "logging", 0, "include" },
 +    // { "logging", 1, "exclude" },
 +    // { "disconnectnode", 1, "nodeid" },
-+    // { "upgradewallet", 0, "version" },
      // Echo with conversion (For testing only)
 -    { "echojson", 0, "arg0" },
 -    { "echojson", 1, "arg1" },
@@ -364,12 +347,7 @@ index 88c8ebe1f..f938477a2 100644
 -    { "createwallet", 1, "disable_private_keys"},
 -    { "createwallet", 2, "blank"},
 -    { "createwallet", 4, "avoid_reuse"},
--    { "createwallet", 5, "descriptors"},
--    { "createwallet", 6, "load_on_startup"},
--    { "loadwallet", 1, "load_on_startup"},
--    { "unloadwallet", 1, "load_on_startup"},
 -    { "getnodeaddresses", 0, "count"},
--    { "addpeeraddress", 1, "port"},
 -    { "stop", 0, "wait" },
 +    // { "echojson", 0, "arg0" },
 +    // { "echojson", 1, "arg1" },
@@ -386,21 +364,16 @@ index 88c8ebe1f..f938477a2 100644
 +    // { "createwallet", 1, "disable_private_keys"},
 +    // { "createwallet", 2, "blank"},
 +    // { "createwallet", 4, "avoid_reuse"},
-+    // { "createwallet", 5, "descriptors"},
-+    // { "createwallet", 6, "load_on_startup"},
-+    // { "loadwallet", 1, "load_on_startup"},
-+    // { "unloadwallet", 1, "load_on_startup"},
 +    // { "getnodeaddresses", 0, "count"},
-+    // { "addpeeraddress", 1, "port"},
 +    // { "stop", 0, "wait" },
  };
  // clang-format on
 
 diff --git a/src/rpc/net.cpp b/src/rpc/net.cpp
-index f98ea6378..e8a976348 100644
+index 8c400c0..fb075b6 100644
 --- a/src/rpc/net.cpp
 +++ b/src/rpc/net.cpp
-@@ -893,20 +893,20 @@ void RegisterNetRPCCommands(CRPCTable &t)
+@@ -764,19 +764,19 @@ void RegisterNetRPCCommands(CRPCTable &t)
  static const CRPCCommand commands[] =
  { //  category              name                      actor (function)         argNames
    //  --------------------- ------------------------  -----------------------  ----------
@@ -423,13 +396,10 @@ index f98ea6378..e8a976348 100644
 -    { "network",            "clearbanned",            &clearbanned,            {} },
 -    { "network",            "setnetworkactive",       &setnetworkactive,       {"state"} },
 -    { "network",            "getnodeaddresses",       &getnodeaddresses,       {"count"} },
--    { "hidden",             "addpeeraddress",         &addpeeraddress,         {"address", "port"} },
 +    // { "network",            "setban",                 &setban,                 {"subnet", "command", "bantime", "absolute"} },
 +    // { "network",            "listbanned",             &listbanned,             {} },
 +    // { "network",            "clearbanned",            &clearbanned,            {} },
 +    // { "network",            "setnetworkactive",       &setnetworkactive,       {"state"} },
 +    // { "network",            "getnodeaddresses",       &getnodeaddresses,       {"count"} },
-+    // { "hidden",             "addpeeraddress",         &addpeeraddress,         {"address", "port"} },
  };
  // clang-format on
-     for (const auto& c : commands) {
