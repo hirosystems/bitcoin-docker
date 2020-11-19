@@ -43,14 +43,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Retrieve BTC Version
-        id: get_version
-        run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
-
-      - name: Output BTC Version
-        id: version
-        run: echo "::set-output name=release_version::${{ env.RELEASE_VERSION }}"
-
 # - run: echo ${{needs.setup.outputs.btc_version}} ${{needs.job1.outputs.output2}}
 
   build:
@@ -65,6 +57,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Retrieve BTC Version
+        id: get_version
+        run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -126,8 +122,6 @@ jobs:
           tags: |
             ${{ env.QUAY_IMAGE }}:${{setup.outputs.btc_version}}${{ matrix.build }}
             ${{ env.DOCKERHUB_IMAGE }}:${{setup.outputs.btc_version}}${{ matrix.build }}
-
-
       # - name: Tag Latest
       #   if: ${{ matrix.build == '' }}
       #   run: |
