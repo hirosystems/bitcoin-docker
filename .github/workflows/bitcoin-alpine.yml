@@ -8,6 +8,7 @@ env:
 
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
