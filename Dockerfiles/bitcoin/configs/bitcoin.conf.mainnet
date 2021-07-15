@@ -1,0 +1,17 @@
+server=1
+txindex=1
+listen=1
+rpcuser=blockstack
+rpcpassword=blockstacksystem
+rpcallowip=0.0.0.0/0
+rpcallowip=::/0
+rpcserialversion=0
+
+maxorphantx=1
+banscore=1
+whitelistalwaysrelay=1
+
+[test]
+bind=0.0.0.0:8333
+rpcbind=0.0.0.0:8332
+rpcport=8332

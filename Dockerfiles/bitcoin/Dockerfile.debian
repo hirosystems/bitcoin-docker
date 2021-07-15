@@ -1,0 +1,33 @@
+FROM debian:stretch-slim
+
+ENV BTC_CONF="/etc/bitcoin/bitcoin.conf"
+ENV BTC_DATA="/root/.bitcoin"
+ENV BTC_PID="/run/bitcoind.pid"
+
+ARG BTC_VERSION
+ARG BTC_BUILD
+ARG BTC_LIBC=glibc
+ARG REPO="https://github.com/blockstackpbc/bitcoin-docker"
+ARG BTC_URL="${REPO}/releases/download/${BTC_VERSION}/${BTC_LIBC}-v${BTC_VERSION}${BTC_BUILD}.tar.gz"
+
+WORKDIR /
+COPY ./configs/bitcoin.conf.mainnet ${BTC_CONF}
+COPY ./configs/bitcoin.conf.testnet ${BTC_CONF}.testnet
+COPY ./configs/bitcoin.conf.regtest ${BTC_CONF}.regtest
+
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    libboost-system-dev \
+    libboost-filesystem-dev \
+    libboost-thread-dev \
+    libboost-chrono-dev \
+    libevent-dev \
+    libzmq5 \
+    && curl -L -o /bitcoin-${BTC_VERSION}.tar.gz ${BTC_URL} \
+    && tar -xzvf /bitcoin-${BTC_VERSION}.tar.gz \
+    && mkdir /root/.bitcoin \
+    && mv /bitcoin-*/bin/* /usr/local/bin/ \
+    && rm -rf /bitcoin-*
+
+ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/bitcoind -conf=${BTC_CONF} -pid=${BTC_PID} -datadir=${BTC_DATA}"]

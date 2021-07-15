@@ -8,3 +8,4 @@
 /packer/bitcoind-gcp-raid.ign
 /build-neon.sh
 .idea
+*.save

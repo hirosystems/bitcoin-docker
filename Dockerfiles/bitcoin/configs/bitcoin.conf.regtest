@@ -1,0 +1,16 @@
+server=1
+regtest=1
+rpcallowip=0.0.0.0/0
+rpcallowip=::/0
+rpcuser=blockstack
+rpcpassword=blockstacksystem
+rpcallowip=0.0.0.0/0
+rpcallowip=::/0
+txindex=1
+listen=1
+rpcserialversion=0
+
+[regtest]
+bind=0.0.0.0:19444
+rpcbind=0.0.0.0:19443
+rpcport=19443

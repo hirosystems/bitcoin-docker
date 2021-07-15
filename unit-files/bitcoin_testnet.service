@@ -36,7 +36,8 @@ ExecStart=/usr/bin/docker run \
   -v /data/bitcoin:/root/.bitcoin \
   --name bitcoin_testnet \
   quay.io/blockstack/bitcoind:alpine \
-/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin
+/usr/local/bin/bitcoind -daemon -conf=/etc/bitcoin/bitcoin.conf -pid=/run/bitcoind.pid -datadir=/root/.bitcoin && \
+/bin/sh -c -- while true; do sleep 30; done;
 
 ExecStop=-/usr/bin/docker stop bitcoin_testnet
 ExecStopPost=-/usr/bin/docker rm -f bitcoin_testnet
