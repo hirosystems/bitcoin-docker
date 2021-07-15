@@ -14,7 +14,7 @@ on:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
-      - Dockerfiles/bitcoin/no_rpc.diff
+      # - Dockerfiles/bitcoin/no_rpc.diff
       # - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine.yml
   pull_request:
@@ -22,7 +22,7 @@ on:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
-      - Dockerfiles/bitcoin/no_rpc.diff
+      # - Dockerfiles/bitcoin/no_rpc.diff
       # - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine.yml
 
@@ -43,9 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # build: [""]
+        build: [""]
         # build: ["", "-statoshi"]
-        build: ["", "-norpc", "-statoshi"]
+        # build: ["", "-norpc", "-statoshi"]
     steps:
       # - name: Echo Version
       #   run: echo ${{needs.setup.outputs.version}}
