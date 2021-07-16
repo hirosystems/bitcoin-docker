@@ -40,6 +40,9 @@ jobs:
         build: [""]
         # build: ["", "-statoshi"]
     steps:
+      - name: Echo BTC Version
+        run: |
+          echo ${{needs.setup.outputs.btc_version}}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
