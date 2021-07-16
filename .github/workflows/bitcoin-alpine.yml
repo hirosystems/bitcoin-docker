@@ -40,9 +40,6 @@ jobs:
         build: [""]
         # build: ["", "-statoshi"]
     steps:
-      - name: Echo BTC Version
-        run: |
-          echo ${{needs.setup.outputs.btc_version}}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up Docker Buildx
@@ -55,7 +52,7 @@ jobs:
           load: true
           file: ${{ env.BINARY_DOCKERFILE }}
           context: ${{ env.CONTEXT }}
-          tags: ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}}
+          tags: ${{ env.DOCKERHUB_IMAGE }}:${{needs.setup.outputs.btc_version}}
           build-args: |
             BTC_VERSION=${{needs.setup.outputs.btc_version}}
             BTC_BUILD=${{ matrix.build }}
@@ -64,7 +61,7 @@ jobs:
         shell: bash
         run: |
           docker rm -f bitcoin-binary || true
-          docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}}
+          docker create --name bitcoin-binary ${{ env.DOCKERHUB_IMAGE }}:${{needs.setup.outputs.btc_version}}
           docker cp bitcoin-binary:/srv/build build
           docker rm -f bitcoin-binary
       - name: Upload BTC Binary Artifacts
@@ -115,5 +112,4 @@ jobs:
       #       BTC_BUILD=${{ matrix.build }}
       #     push: true
       #     tags: |
-      #       ${{ env.QUAY_IMAGE }}:latest
       #       ${{ env.DOCKERHUB_IMAGE }}:latest
