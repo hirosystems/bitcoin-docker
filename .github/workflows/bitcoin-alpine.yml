@@ -1,11 +1,9 @@
 name: bitcoin-alpine
 env:
-  QUAY_IMAGE: quay.io/blockstack/bitcoind
   DOCKERHUB_IMAGE: blockstack/bitcoind
   CONTEXT: Dockerfiles/bitcoin
   BINARY_DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine.binary
   DOCKERFILE: Dockerfiles/bitcoin/Dockerfile.alpine
-
 
 on:
   workflow_dispatch:
@@ -14,16 +12,12 @@ on:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
-      # - Dockerfiles/bitcoin/no_rpc.diff
-      # - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine.yml
   pull_request:
     paths:
       - Dockerfiles/bitcoin/Dockerfile.alpine.binary
       - Dockerfiles/bitcoin/Dockerfile.alpine
       - Dockerfiles/bitcoin/make_binary_dist.sh
-      # - Dockerfiles/bitcoin/no_rpc.diff
-      # - Dockerfiles/bitcoin/VERSION
       - .github/workflows/bitcoin-alpine.yml
 
 jobs:
@@ -45,27 +39,13 @@ jobs:
       matrix:
         build: [""]
         # build: ["", "-statoshi"]
-        # build: ["", "-norpc", "-statoshi"]
     steps:
-      # - name: Echo Version
-      #   run: echo ${{needs.setup.outputs.version}}
-
       - name: Checkout
         uses: actions/checkout@v2
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         with:
           driver-opts: network=host
-
-      # - name: Retrieve BTC Version
-      #   id: get_version
-      #   run: echo "RELEASE_VERSION=$(cat ${CONTEXT}/VERSION)" >> $GITHUB_ENV
-
-      # - name: Retrieve BTC Version
-      #   id: get_version
-      #   run: curl --silent "https://api.github.com/repos/bitcoin/bitcoin/releases/latest" | jq -r .tag_name
-
       - name: Build BTC Binary Archive
         uses: docker/build-push-action@v2
         with:
@@ -77,7 +57,6 @@ jobs:
             BTC_VERSION=${{needs.setup.outputs.btc_version}}
             BTC_BUILD=${{ matrix.build }}
           push: false
-
       - name: Copy BTC Binary Archive
         shell: bash
         run: |
@@ -85,14 +64,12 @@ jobs:
           docker create --name bitcoin-binary ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}}
           docker cp bitcoin-binary:/srv/build build
           docker rm -f bitcoin-binary
-
       - name: Upload BTC Binary Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: bitcoin-${{needs.setup.outputs.btc_version}}.tar.gz
           path: |
             build
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -104,23 +81,13 @@ jobs:
           #   Alpine Bitcoin Binaries for version: ${{needs.setup.outputs.btc_version}}
           #   - statoshi fork: https://github.com/jlopp/statoshi
           #   - btc main: https://github.com/bitcoin/bitcoin
-          #   - btc main (without wallet or some rpc commands): https://github.com/bitcoin/bitcoin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to Quay
-        uses: docker/login-action@v1
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-
       - name: Login to Dockerhub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
       - name: Build and Push ${{needs.setup.outputs.btc_version}}
         uses: docker/build-push-action@v2
         with:
@@ -131,19 +98,19 @@ jobs:
             BTC_BUILD=${{ matrix.build }}
           push: true
           tags: |
-            ${{ env.QUAY_IMAGE }}:${{needs.setup.outputs.btc_version}}${{ matrix.build }}
             ${{ env.DOCKERHUB_IMAGE }}:${{needs.setup.outputs.btc_version}}${{ matrix.build }}
 
-      - name: Build and Push latest
-        if: ${{ matrix.build == '' }}
-        uses: docker/build-push-action@v2
-        with:
-          file: ${{ env.DOCKERFILE }}
-          context: ${{ env.CONTEXT }}
-          build-args: |
-            BTC_VERSION=${{needs.setup.outputs.btc_version}}
-            BTC_BUILD=${{ matrix.build }}
-          push: true
-          tags: |
-            ${{ env.QUAY_IMAGE }}:latest
-            ${{ env.DOCKERHUB_IMAGE }}:latest
+      # # Disable creating a `latest` tag
+      # - name: Build and Push latest
+      #   if: ${{ matrix.build == '' }}
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     file: ${{ env.DOCKERFILE }}
+      #     context: ${{ env.CONTEXT }}
+      #     build-args: |
+      #       BTC_VERSION=${{needs.setup.outputs.btc_version}}
+      #       BTC_BUILD=${{ matrix.build }}
+      #     push: true
+      #     tags: |
+      #       ${{ env.QUAY_IMAGE }}:latest
+      #       ${{ env.DOCKERHUB_IMAGE }}:latest
